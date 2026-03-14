@@ -125,12 +125,16 @@ class SyncService:
         except Exception as e:
             return {"ok": False, "message": str(e)}
 
-    def send_heartbeat(self, station_name: str, last_clear_epoch: str | None, local_scan_count: int, retries: int = 1) -> bool:
-        """Report station status to cloud. Retries on failure. Returns True on success."""
-        from config import CLOUD_READ_ONLY
-        if CLOUD_READ_ONLY:
+    def send_heartbeat(self, station_name: str, last_clear_epoch: str | None, local_scan_count: int, retries: int = 1) -> dict | None:
+        """Report station status to cloud. Retries on failure.
+
+        Returns parsed JSON response dict on success (may include 'license' field),
+        or None on failure.
+        """
+        import config as _cfg
+        if _cfg.CLOUD_READ_ONLY and not getattr(_cfg, '_license_read_only', False):
             LOGGER.debug("Heartbeat skipped (read-only mode)")
-            return True
+            return {"ok": True, "skipped": True}
         for attempt in range(1 + retries):
             try:
                 response = requests.post(
@@ -144,13 +148,16 @@ class SyncService:
                     timeout=self.connection_timeout,
                 )
                 if response.status_code == 200:
-                    return True
+                    try:
+                        return response.json()
+                    except (json.JSONDecodeError, ValueError):
+                        return {"ok": True}
             except Exception as e:
                 LOGGER.debug("Heartbeat attempt %d failed: %s", attempt + 1, e)
             if attempt < retries:
                 time.sleep(2)
         LOGGER.warning("Heartbeat failed after %d attempt(s)", 1 + retries)
-        return False
+        return None
 
     def get_station_status(self) -> Dict[str, object]:
         """Get all station statuses from cloud (public endpoint)."""

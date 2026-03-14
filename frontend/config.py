@@ -94,6 +94,15 @@ CLOUD_READ_ONLY = os.getenv("CLOUD_READ_ONLY", "False").lower() in ("true", "1",
 if CLOUD_READ_ONLY:
     print("[Config] CLOUD_READ_ONLY=true — no heartbeats, syncs, or roster uploads will be sent")
 
+# Internal flag: True when CLOUD_READ_ONLY was set by license enforcement
+# (vs. manually by user). When license-set, heartbeats continue so status
+# can be re-checked and restored when the license is renewed.
+_license_read_only = False
+
+# Last license details received from heartbeat (populated at runtime).
+# Keys: tier, expires_at, stations_used, stations_max
+_license_info: dict | None = None
+
 # Live Sync: immediate cloud sync + cross-station duplicate check after each scan
 # Disabled automatically when CLOUD_READ_ONLY=true
 LIVE_SYNC_ENABLED = os.getenv("LIVE_SYNC_ENABLED", "False").lower() in ("true", "1", "yes")

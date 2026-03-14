@@ -295,6 +295,7 @@ class TestSyncClearStation(unittest.TestCase):
         with patch("requests.post") as mock_post:
             mock_response = MagicMock()
             mock_response.status_code = 200
+            mock_response.json.return_value = {"ok": True, "status": "ok"}
             mock_post.return_value = mock_response
 
             result = sync.send_heartbeat("Gate A", "2026-03-01T10:00:00Z", 42)
@@ -306,7 +307,8 @@ class TestSyncClearStation(unittest.TestCase):
             assert body["station_name"] == "Gate A"
             assert body["last_clear_epoch"] == "2026-03-01T10:00:00Z"
             assert body["local_scan_count"] == 42
-            assert result is True
+            assert result is not None
+            assert result["ok"] is True
 
     def test_get_station_status_returns_stations(self):
         sync = self._make_sync()
@@ -327,12 +329,12 @@ class TestSyncClearStation(unittest.TestCase):
             assert len(result["stations"]) == 2
             assert result["stations"][0]["status"] == "ready"
 
-    def test_heartbeat_failure_returns_false(self):
+    def test_heartbeat_failure_returns_none(self):
         sync = self._make_sync()
         with patch("requests.post") as mock_post:
             mock_post.side_effect = Exception("network error")
             result = sync.send_heartbeat("Gate A", None, 0)
-            assert result is False
+            assert result is None
 
     def test_clear_station_failure_returns_error(self):
         sync = self._make_sync()

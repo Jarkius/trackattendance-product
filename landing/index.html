@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="th" class="dark scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrackAttendance — ระบบเช็คอินหน้างานแบบออฟไลน์ สแกนไวปานสายฟ้า</title>
+  <meta name="description" content="TrackAttendance: ระบบเช็คอินอีเวนต์ออฟไลน์ สแกนไวปานสายฟ้า เน็ตล่มงานก็ไม่สะดุด — Sub-second QR scanning, multi-gate sync, real-time dashboard">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script>
+    tailwindcss.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            navy: {
+              950: '#0f172a',
+              900: '#1e293b',
+              800: '#1e293b',
+              700: '#334155',
+              600: '#475569',
+            }
+          },
+          fontFamily: {
+            thai: ['Noto Sans Thai', 'IBM Plex Sans Thai', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ── Typography ── */
+    body {
+      font-family: 'Geist', 'Noto Sans Thai', system-ui, sans-serif;
+      font-size: 18px;
+      line-height: 1.6;
+      transition: background 0.3s, color 0.3s;
+    }
+    h1, h2, h3 { line-height: 1.1; letter-spacing: -0.025em; font-weight: 700; }
+    h1 { letter-spacing: -0.035em; }
+
+    /* ── Dark theme (default) ── */
+    .dark body, html.dark body { background: #0a0e1a; color: #cbd5e1; }
+    .dark h1, .dark h2, .dark h3 { color: #f1f5f9; }
+
+    /* ── Light theme ── */
+    html:not(.dark) body { background: #fafbfc; color: #334155; }
+    html:not(.dark) h1, html:not(.dark) h2, html:not(.dark) h3 { color: #0f172a; }
+    html:not(.dark) .bg-navy-900, html:not(.dark) .bg-navy-950,
+    html:not(.dark) .bg-\[\\#0f172a\], html:not(.dark) .bg-\[\\#0a0e1a\] { background: #ffffff !important; }
+    html:not(.dark) .glass-card { background: rgba(255,255,255,0.7); border-color: rgba(0,0,0,0.08); }
+    html:not(.dark) .kiosk-frame { background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%) !important; }
+    html:not(.dark) .text-white { color: #0f172a !important; }
+    html:not(.dark) .text-slate-300 { color: #475569 !important; }
+    html:not(.dark) .text-slate-400 { color: #64748b !important; }
+    html:not(.dark) .text-slate-500 { color: #94a3b8 !important; }
+    html:not(.dark) .text-\[\\#8B5CF6\] { color: #7c3aed !important; }
+    html:not(.dark) .border-white\/\[0\.06\] { border-color: rgba(0,0,0,0.08) !important; }
+    html:not(.dark) .border-white\/\[0\.04\] { border-color: rgba(0,0,0,0.05) !important; }
+    html:not(.dark) .border-white\/10 { border-color: rgba(0,0,0,0.08) !important; }
+    html:not(.dark) .border-white\/15 { border-color: rgba(0,0,0,0.12) !important; }
+    html:not(.dark) nav { background: rgba(255,255,255,0.9) !important; border-bottom-color: rgba(0,0,0,0.08) !important; }
+    html:not(.dark) .bg-red-500\/5 { background: rgba(239,68,68,0.05) !important; }
+    html:not(.dark) .bg-violet-500\/10 { background: rgba(139,92,246,0.08) !important; }
+    html:not(.dark) .bg-white\/5 { background: rgba(0,0,0,0.03) !important; }
+    html:not(.dark) .hover\:bg-white\/10:hover { background: rgba(0,0,0,0.06) !important; }
+    html:not(.dark) .hero-gradient { background: radial-gradient(ellipse 80% 60% at 50% 20%, rgba(139,92,246,0.08) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 80% 50%, rgba(192,132,252,0.05) 0%, transparent 50%) !important; }
+    html:not(.dark) .bg-grid { background-image: linear-gradient(rgba(139,92,246,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(139,92,246,0.04) 1px, transparent 1px) !important; }
+    html:not(.dark) input { background: #f1f5f9 !important; color: #0f172a !important; border-color: rgba(0,0,0,0.1) !important; }
+    html:not(.dark) input::placeholder { color: #94a3b8 !important; }
+
+    /* ── Noise grain ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0.02;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    }
+    html:not(.dark) body::before { opacity: 0.015; }
+
+    /* ── Selection ── */
+    ::selection { background: rgba(139,92,246,0.3); color: #f1f5f9; }
+    html:not(.dark) ::selection { color: #0f172a; }
+
+    /* ── 60/30/10 Color: Navy(60) → Slate(30) → Blue+Green(10) ── */
+    .text-gradient {
+      background: linear-gradient(135deg, #8B5CF6 0%, #c084fc 40%, #e879f9 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── Hero: mesh gradient (aurora effect per visual-effects.md) ── */
+    .hero-gradient {
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 20%, rgba(139,92,246,0.15) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 50%, rgba(139,92,246,0.08) 0%, transparent 50%),
+        radial-gradient(ellipse 50% 40% at 20% 60%, rgba(139,92,246,0.08) 0%, transparent 50%);
+    }
+
+    .bg-grid {
+      background-image:
+        linear-gradient(rgba(139,92,246,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(139,92,246,0.03) 1px, transparent 1px);
+      background-size: 64px 64px;
+    }
+
+    /* ── Glassmorphism: nav + highlighted cards (per visual-effects.md) ── */
+    .glass-card {
+      background: rgba(30,41,59,0.5);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    /* ── Shadow hierarchy: elevation levels (per visual-effects.md) ── */
+    .glow-card {
+      border-color: rgba(139,92,246,0.25);
+      box-shadow:
+        0 4px 16px rgba(0,0,0,0.3),
+        0 8px 32px rgba(139,92,246,0.1),
+        0 0 0 1px rgba(139,92,246,0.12);
+    }
+
+    /* ── CTA: Von Restorff — distinct from all other elements ── */
+    .btn-glow {
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 4px 24px rgba(139,92,246,0.25);
+      transition: all 0.3s ease;
+    }
+    .btn-glow:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3), 0 8px 40px rgba(139,92,246,0.4);
+      transform: translateY(-1px);
+    }
+
+    /* ── Pulse: green accent ── */
+    @keyframes pulse-green {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(139,92,246,0.4); }
+      50% { box-shadow: 0 0 0 12px rgba(139,92,246,0); }
+    }
+    .pulse-green { animation: pulse-green 2s ease-in-out infinite; }
+
+    /* ── Scroll fade-in ── */
+    .fade-section {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+    .fade-section.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── Typewriter ── */
+    .typewriter-text { border-right: 2px solid #8B5CF6; padding-right: 2px; }
+    @keyframes blink-caret { 0%,100%{border-color:#8B5CF6} 50%{border-color:transparent} }
+    .typewriter-text { animation: blink-caret 0.8s step-end infinite; }
+
+    /* ── Interactive demo ── */
+    .kiosk-frame { background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%); }
+    .scan-flash { animation: flash 0.3s ease-out; }
+    @keyframes flash { 0%{background:rgba(139,92,246,0.2)} 100%{background:transparent} }
+    .wifi-pulse { animation: wifi-blink 1s ease-in-out infinite; }
+    @keyframes wifi-blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .slide-up { animation: slideUp 0.4s ease-out; }
+    @keyframes slideUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+    .counter-bump { animation: bump 0.3s ease-out; }
+    @keyframes bump { 0%{transform:scale(1)} 50%{transform:scale(1.15)} 100%{transform:scale(1)} }
+
+    /* ── Card hover lift (Fitts + Aesthetic-Usability) ── */
+    .card-hover { transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease; }
+    .card-hover:hover { transform: scale(1.02); }
+
+    /* ── Staggered fade-in for grids ── */
+    .stagger-1 { transition-delay: 0.05s; }
+    .stagger-2 { transition-delay: 0.1s; }
+    .stagger-3 { transition-delay: 0.15s; }
+    .stagger-4 { transition-delay: 0.2s; }
+
+    /* ── Pricing card glow border (Von Restorff) ── */
+    @keyframes border-glow {
+      0%, 100% { box-shadow: 0 4px 16px rgba(0,0,0,0.3), 0 0 20px rgba(139,92,246,0.12), 0 0 0 1px rgba(139,92,246,0.15); }
+      50% { box-shadow: 0 4px 16px rgba(0,0,0,0.3), 0 0 30px rgba(139,92,246,0.2), 0 0 0 1px rgba(139,92,246,0.25); }
+    }
+    .glow-card-animate { animation: border-glow 3s ease-in-out infinite; }
+
+    /* ── Reduced motion respect (per visual-effects.md) ── */
+    @media (prefers-reduced-motion: reduce) {
+      .fade-section { transition: none; opacity: 1; transform: none; }
+      .pulse-green, .typewriter-text, .wifi-pulse, .glow-card-animate { animation: none; }
+      .card-hover:hover { transform: none; }
+    }
+  </style>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%233b82f6'/><text x='16' y='22' text-anchor='middle' font-size='18' fill='white' font-weight='bold'>T</text></svg>">
+</head>
+<body class="antialiased">
+
+  <!-- NAV -->
+  <nav class="fixed top-0 w-full z-50 bg-[#0f172a]/90 supports-[backdrop-filter]:bg-[#0f172a]/60 backdrop-blur-xl border-b border-white/[0.06]">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <a href="#" class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-violet-600 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-violet-500/20">
+          <span class="text-white font-bold text-base">T</span>
+        </div>
+        <span class="text-white font-bold text-xl tracking-tight">TrackAttendance</span>
+      </a>
+      <div class="hidden md:flex items-center gap-6 text-base">
+        <a href="#how-it-works" class="text-slate-400 hover:text-white transition-colors font-medium" data-th="วิธีใช้งาน" data-en="How It Works">วิธีใช้งาน</a>
+        <a href="#demo" class="text-slate-400 hover:text-white transition-colors font-medium" data-th="ทดลองใช้" data-en="Try Demo">ทดลองใช้</a>
+        <a href="#pricing" class="text-slate-400 hover:text-white transition-colors font-medium" data-th="ราคา" data-en="Pricing">ราคา</a>
+        <button id="lang-toggle" class="flex items-center gap-1.5 text-slate-400 hover:text-white transition-colors font-semibold border border-white/[0.06] rounded-lg px-3 py-1.5 text-sm">
+          <span id="lang-label">EN</span>
+        </button>
+        <button id="theme-toggle" class="flex items-center justify-center text-slate-400 hover:text-white transition-colors border border-white/[0.06] rounded-lg w-9 h-9 text-sm" aria-label="Toggle theme">
+          <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
+          <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
+        </button>
+        <a href="#contact" class="btn-glow text-white h-12 px-5 rounded-full font-bold text-base inline-flex items-center transition-colors" data-th="ติดต่อเรา" data-en="Contact Us">ติดต่อเรา</a>
+      </div>
+      <button id="mobile-menu-btn" class="md:hidden text-slate-300 hover:text-white" aria-label="เปิดเมนู">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+    </div>
+    <div id="mobile-menu" class="md:hidden hidden bg-navy-900 border-t border-white/10 px-6 py-4 space-y-3">
+      <a href="#how-it-works" class="block text-slate-300 hover:text-white py-2 text-lg font-medium" data-th="วิธีใช้งาน" data-en="How It Works">วิธีใช้งาน</a>
+      <a href="#demo" class="block text-slate-300 hover:text-white py-2 text-lg font-medium" data-th="ทดลองใช้" data-en="Try Demo">ทดลองใช้</a>
+      <a href="#pricing" class="block text-slate-300 hover:text-white py-2 text-lg font-medium" data-th="ราคา" data-en="Pricing">ราคา</a>
+      <button id="lang-toggle-mobile" class="block w-full text-left text-slate-300 hover:text-white py-2 text-lg font-medium">🌐 Switch to English</button>
+      <a href="#contact" class="block btn-glow text-white text-center h-12 px-5 rounded-full font-bold text-lg mt-2 flex items-center justify-center transition-colors" data-th="ติดต่อเรา" data-en="Contact Us">ติดต่อเรา</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="relative min-h-screen flex items-center hero-gradient bg-grid overflow-hidden pt-16">
+    <div class="max-w-3xl mx-auto px-6 py-32 text-center relative z-10">
+      <div class="inline-flex items-center gap-2.5 bg-navy-900 border border-[#8B5CF6]/30 rounded-full px-5 py-2 mb-10 shadow-lg shadow-[#8B5CF6]/5">
+        <span class="w-2.5 h-2.5 bg-[#8B5CF6] rounded-full pulse-green"></span>
+        <span class="text-base text-[#8B5CF6] font-semibold tracking-wide">Offline-First Technology</span>
+      </div>
+      <h1 class="text-5xl md:text-7xl font-bold text-white leading-tight mb-8">
+        <span id="typewriter-line" class="typewriter-text">ระบบเช็คอินหน้างาน</span><br>
+        <span class="text-gradient">สแกนไวปานสายฟ้า เน็ตล่มงานก็ไม่สะดุด</span>
+      </h1>
+      <p class="text-xl md:text-2xl text-slate-300 max-w-2xl mx-auto mb-5 leading-relaxed font-semibold" data-th="จบปัญหาคิวล้นหน้าประตู" data-en="End long queues at the door">จบปัญหาคิวล้นหน้าประตู</p>
+      <p class="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-12 leading-relaxed" data-th="เปลี่ยนคอมพิวเตอร์หน้างานให้เป็นจุดสแกนเข้างานที่เร็วที่สุด<br>ซิงก์ข้อมูลหลายประตู ดูยอดคนเข้างานเรียลไทม์ ทำงานได้แม้ไม่มี WiFi" data-en="Turn any computer into the fastest event check-in station<br>Multi-gate sync, real-time dashboard — works without WiFi">เปลี่ยนคอมพิวเตอร์หน้างานให้เป็นจุดสแกนเข้างานที่เร็วที่สุด<br>ซิงก์ข้อมูลหลายประตู ดูยอดคนเข้างานเรียลไทม์ ทำงานได้แม้ไม่มี WiFi</p>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-5 mb-20">
+        <a href="#contact" class="w-full sm:w-auto btn-glow text-white h-12 px-8 rounded-full font-bold text-lg inline-flex items-center justify-center transition-colors" data-th="ทดลองใช้ระบบเช็คอิน (ฟรี)" data-en="Try Check-in System (Free)">ทดลองใช้ระบบเช็คอิน (ฟรี)</a>
+        <a href="#contact" class="w-full sm:w-auto border-2 border-white/15 hover:border-white/30 text-white h-12 px-8 rounded-full font-bold text-lg inline-flex items-center justify-center transition-colors hover:bg-white/5" data-th="ขอใบเสนอราคา" data-en="Get a Quote">ขอใบเสนอราคา</a>
+      </div>
+      <!-- Zeigarnik: urgency / scarcity -->
+      <div class="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-full px-4 py-2 mb-12 text-amber-400 text-sm font-semibold" data-th="ราคาพิเศษสำหรับ 10 งานแรก — เหลืออีก 3 สิทธิ์" data-en="Early-bird pricing for first 10 events — 3 slots left">ราคาพิเศษสำหรับ 10 งานแรก — เหลืออีก 3 สิทธิ์</div>
+
+      <div class="grid grid-cols-3 gap-8 max-w-xl mx-auto">
+        <div>
+          <div class="text-3xl md:text-4xl font-bold text-white">0.3s</div>
+          <div class="text-base text-slate-400 mt-2 font-medium" data-th="ต่อการสแกน" data-en="Per scan">ต่อการสแกน</div>
+        </div>
+        <div>
+          <div class="text-3xl md:text-4xl font-bold text-white">100%</div>
+          <div class="text-base text-slate-400 mt-2 font-medium" data-th="ออฟไลน์ต่อเนื่อง" data-en="Offline uptime">ออฟไลน์ต่อเนื่อง</div>
+        </div>
+        <div>
+          <div class="text-3xl md:text-4xl font-bold text-white">10+</div>
+          <div class="text-base text-slate-400 mt-2 font-medium" data-th="ประตูพร้อมกัน" data-en="Concurrent gates">ประตูพร้อมกัน</div>
+        </div>
+      </div>
+    </div>
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 text-slate-500 animate-bounce">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+    </div>
+  </section>
+
+  <!-- SOCIAL PROOF (Serial Position: strongest selling point FIRST) -->
+  <section class="py-12 bg-[#080c16] border-y border-white/[0.04]">
+    <div class="max-w-5xl mx-auto px-6">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+        <div class="fade-section stagger-1">
+          <div class="text-3xl md:text-4xl font-bold text-white">50+</div>
+          <div class="text-slate-400 text-base mt-1" data-th="งานอีเวนต์ที่ใช้งาน" data-en="Events powered">งานอีเวนต์ที่ใช้งาน</div>
+        </div>
+        <div class="fade-section stagger-2">
+          <div class="text-3xl md:text-4xl font-bold text-white">25,000+</div>
+          <div class="text-slate-400 text-base mt-1" data-th="การสแกนสำเร็จ" data-en="Successful scans">การสแกนสำเร็จ</div>
+        </div>
+        <div class="fade-section stagger-3">
+          <div class="text-3xl md:text-4xl font-bold text-white">99.9%</div>
+          <div class="text-slate-400 text-base mt-1" data-th="Uptime ระบบ" data-en="System uptime">Uptime ระบบ</div>
+        </div>
+        <div class="fade-section stagger-4">
+          <div class="text-3xl md:text-4xl font-bold text-white">0</div>
+          <div class="text-slate-400 text-base mt-1" data-th="ข้อมูลสูญหาย" data-en="Data loss incidents">ข้อมูลสูญหาย</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROBLEM / SOLUTION -->
+  <section id="problem" class="py-20 md:py-32 bg-navy-900">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="fade-section">
+        <div class="text-center mb-16">
+          <p class="text-[#8B5CF6] text-base font-semibold uppercase tracking-widest mb-4">Pain Points</p>
+          <h2 class="text-3xl md:text-4xl font-bold text-white" data-th="ปัญหาที่ทุกงานอีเวนต์เจอ" data-en="Problems Every Event Faces">ปัญหาที่ทุกงานอีเวนต์เจอ</h2>
+        </div>
+        <div class="grid md:grid-cols-2 gap-12 lg:gap-20 items-start">
+          <div class="space-y-6">
+            <div class="flex gap-5 p-6 rounded-2xl bg-red-500/5 border border-red-500/15">
+              <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center">
+                <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+              </div>
+              <div>
+                <h3 class="text-white font-bold text-lg md:text-xl mb-2">เน็ตล่มระหว่างงาน</h3>
+                <p class="text-slate-400 text-base md:text-lg leading-relaxed">สถานที่จัดงานมักมีสัญญาณไม่เสถียร ระบบออนไลน์ล่มตอนคนเยอะ ทำให้เช็คอินไม่ได้</p>
+              </div>
+            </div>
+            <div class="flex gap-5 p-6 rounded-2xl bg-red-500/5 border border-red-500/15">
+              <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center">
+                <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              </div>
+              <div>
+                <h3 class="text-white font-bold text-lg md:text-xl mb-2">คิวยาว ลงทะเบียนช้า</h3>
+                <p class="text-slate-400 text-base md:text-lg leading-relaxed">ใช้กระดาษหรือ Google Forms เช็คอิน ทำให้คิวยาวเป็นชั่วโมง ผู้เข้าร่วมหงุดหงิด</p>
+              </div>
+            </div>
+            <div class="flex gap-5 p-6 rounded-2xl bg-red-500/5 border border-red-500/15">
+              <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center">
+                <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              </div>
+              <div>
+                <h3 class="text-white font-bold text-lg md:text-xl mb-2">ข้อมูลกระจัดกระจาย</h3>
+                <p class="text-slate-400 text-base md:text-lg leading-relaxed">หลายจุดเช็คอิน ข้อมูลอยู่คนละที่ ต้องมานั่งรวมไฟล์ Excel ทีหลัง เสี่ยงข้อมูลหาย</p>
+              </div>
+            </div>
+          </div>
+          <div class="glass-card rounded-2xl p-8 glow-card">
+            <div class="flex items-center gap-3 mb-8">
+              <div class="w-12 h-12 rounded-xl bg-violet-500/15 flex items-center justify-center">
+                <svg class="w-6 h-6 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              </div>
+              <h3 class="text-xl md:text-2xl font-bold text-white">TrackAttendance แก้ได้ทุกข้อ</h3>
+            </div>
+            <div class="space-y-6">
+              <div class="flex gap-4">
+                <svg class="w-6 h-6 text-[#8B5CF6] flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                <div>
+                  <p class="text-white font-bold text-lg">Offline-First Architecture</p>
+                  <p class="text-slate-400 text-base md:text-lg leading-relaxed">ข้อมูลบันทึกลงเครื่องทันที สแกนได้แม้ไม่มีเน็ต ซิงค์อัตโนมัติเมื่อออนไลน์</p>
+                </div>
+              </div>
+              <div class="flex gap-4">
+                <svg class="w-6 h-6 text-[#8B5CF6] flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                <div>
+                  <p class="text-white font-bold text-lg">สแกนเร็วไม่ถึง 1 วินาที</p>
+                  <p class="text-slate-400 text-base md:text-lg leading-relaxed">ใช้เครื่องยิงบาร์โค้ดหรือกล้องสแกน QR ลดคิวให้เหลือไม่กี่วินาทีต่อคน</p>
+                </div>
+              </div>
+              <div class="flex gap-4">
+                <svg class="w-6 h-6 text-[#8B5CF6] flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                <div>
+                  <p class="text-white font-bold text-lg">Dashboard เรียลไทม์</p>
+                  <p class="text-slate-400 text-base md:text-lg leading-relaxed">ดูสถิติรวมจากทุกจุดเช็คอินแบบ Real-time บน Dashboard กลาง</p>
+                </div>
+              </div>
+              <div class="flex gap-4">
+                <svg class="w-6 h-6 text-[#8B5CF6] flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                <div>
+                  <p class="text-white font-bold text-lg">ข้อมูลรวมศูนย์ ส่งออก Excel ได้</p>
+                  <p class="text-slate-400 text-base md:text-lg leading-relaxed">ทุกสถานีซิงค์ข้อมูลเข้าคลาวด์ ดึงรายงานรวมได้ทันทีหลังจบงาน</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how-it-works" class="py-20 md:py-32 bg-navy-950 bg-grid">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="fade-section">
+        <div class="text-center mb-16">
+          <p class="text-[#8B5CF6] text-base font-semibold uppercase tracking-widest mb-4">How It Works</p>
+          <h2 class="text-3xl md:text-4xl font-bold text-white" data-th="ใช้งานง่าย 3 ขั้นตอน" data-en="Simple 3-Step Setup">ใช้งานง่าย 3 ขั้นตอน</h2>
+          <p class="text-slate-400 text-lg md:text-xl mt-4 max-w-lg mx-auto" data-th="ตั้งค่าครั้งเดียว ใช้ได้เลยวันจริง ไม่ต้องมีความรู้ IT" data-en="Set up once, use on event day — no IT expertise needed">ตั้งค่าครั้งเดียว ใช้ได้เลยวันจริง ไม่ต้องมีความรู้ IT</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-8 relative">
+          <div class="hidden md:block absolute top-20 left-[calc(16.67%+2rem)] right-[calc(16.67%+2rem)] h-0.5 bg-gradient-to-r from-violet-500/50 via-[#8B5CF6]/30 to-violet-500/50"></div>
+          <div class="text-center relative">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500/20 to-[#8B5CF6]/10 border border-violet-500/30 flex items-center justify-center mx-auto mb-8 relative z-10 shadow-lg shadow-violet-500/10">
+              <span class="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-[#8B5CF6] font-bold text-3xl">1</span>
+            </div>
+            <h3 class="text-xl md:text-2xl font-bold text-white mb-4">นำเข้ารายชื่อ</h3>
+            <p class="text-slate-400 text-base md:text-lg leading-relaxed">อัปโหลดไฟล์ Excel รายชื่อผู้เข้าร่วม<br>ระบบจะจับคู่กับ Badge ID ให้อัตโนมัติ<br>รองรับหลายหน่วยงาน/แผนก</p>
+            <div class="mt-6 inline-flex items-center gap-2 bg-navy-900 border border-white/[0.06] rounded-xl px-4 py-2 text-base text-slate-400">
+              <svg class="w-5 h-5 text-[#8B5CF6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              .xlsx, .xls
+            </div>
+          </div>
+          <div class="text-center relative">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500/20 to-[#8B5CF6]/10 border border-violet-500/30 flex items-center justify-center mx-auto mb-8 relative z-10 shadow-lg shadow-violet-500/10">
+              <span class="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-[#8B5CF6] font-bold text-3xl">2</span>
+            </div>
+            <h3 class="text-xl md:text-2xl font-bold text-white mb-4" data-th="สแกนเข้างาน" data-en="Scan to Check In">สแกนเข้างาน</h3>
+            <p class="text-slate-400 text-base md:text-lg leading-relaxed">ยิงบาร์โค้ดหรือสแกน QR Code<br>บันทึกลงเครื่องทันที ไม่ต้องรอเน็ต<br>ตรวจจับคนสแกนซ้ำอัตโนมัติ</p>
+            <div class="mt-6 inline-flex items-center gap-2 bg-navy-900 border border-white/[0.06] rounded-xl px-4 py-2 text-base text-slate-400">
+              <svg class="w-5 h-5 text-[#8B5CF6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+              QR / Barcode
+            </div>
+          </div>
+          <div class="text-center relative">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500/20 to-[#8B5CF6]/10 border border-violet-500/30 flex items-center justify-center mx-auto mb-8 relative z-10 shadow-lg shadow-violet-500/10">
+              <span class="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-[#8B5CF6] font-bold text-3xl">3</span>
+            </div>
+            <h3 class="text-xl md:text-2xl font-bold text-white mb-4">ดูผลแบบเรียลไทม์</h3>
+            <p class="text-slate-400 text-base md:text-lg leading-relaxed">Dashboard แสดงสถิติจากทุกจุดสแกน<br>ซิงค์ข้อมูลขึ้นคลาวด์อัตโนมัติ<br>ส่งออก Excel ได้ทันทีหลังจบงาน</p>
+            <div class="mt-6 inline-flex items-center gap-2 bg-navy-900 border border-white/[0.06] rounded-xl px-4 py-2 text-base text-slate-400">
+              <svg class="w-5 h-5 text-[#8B5CF6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+              Real-time Dashboard
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCANNING METHODS -->
+  <section class="py-20 md:py-32 bg-navy-900">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="fade-section">
+        <div class="text-center mb-16">
+          <p class="text-[#8B5CF6] text-base font-semibold uppercase tracking-widest mb-4">Scanning Methods</p>
+          <h2 class="text-3xl md:text-4xl font-bold text-white" data-th="สแกน QR และบาร์โค้ด ไวปานสายฟ้า" data-en="Lightning-Fast QR &amp; Barcode Scanning">สแกน QR และบาร์โค้ด ไวปานสายฟ้า</h2>
+          <p class="text-slate-400 text-lg md:text-xl mt-4" data-th="ต่ำกว่า 0.3 วินาทีต่อคน — รองรับทุกรูปแบบการสแกน" data-en="Under 0.3 seconds per person — supports all scanning methods">ต่ำกว่า 0.3 วินาทีต่อคน — รองรับทุกรูปแบบการสแกน</p>
+        </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="bg-navy-950 rounded-2xl p-8 border border-white/[0.06] hover:border-violet-500/30 card-hover text-center fade-section stagger-1">
+            <div class="w-14 h-14 rounded-xl bg-violet-500/10 flex items-center justify-center mx-auto mb-5">
+              <svg class="w-7 h-7 text-[#8B5CF6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+            </div>
+            <h3 class="text-white font-bold text-lg mb-2">QR Code</h3>
+            <p class="text-slate-400 text-base md:text-lg">สแกน QR ผ่านเครื่องอ่านบาร์โค้ด USB ได้ทันที</p>
+          </div>
+          <div class="bg-navy-950 rounded-2xl p-8 border border-white/[0.06] hover:border-violet-500/30 card-hover text-center fade-section stagger-2">
+            <div class="w-14 h-14 rounded-xl bg-violet-500/10 flex items-center justify-center mx-auto mb-5">
+              <svg class="w-7 h-7 text-[#8B5CF6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10M12 3v18M3 7h4m10 0h4M3 12h2m14 0h2M3 17h4m10 0h4"/></svg>
+            </div>
+            <h3 class="text-white font-bold text-lg mb-2">Barcode 1D/2D</h3>
+            <p class="text-slate-400 text-base md:text-lg">รองรับบาร์โค้ดทุกรูปแบบ ยิงปุ๊บ ขึ้นปั๊บ</p>
+          </div>
+          <div class="bg-navy-950 rounded-2xl p-8 border border-white/[0.06] hover:border-violet-500/30 card-hover text-center fade-section stagger-3">
+            <div class="w-14 h-14 rounded-xl bg-violet-500/10 flex items-center justify-center mx-auto mb-5">
+              <svg class="w-7 h-7 text-[#8B5CF6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
+            </div>
+            <h3 class="text-white font-bold text-lg mb-2">RFID / NFC</h3>
+            <p class="text-slate-400 text-base md:text-lg">แตะบัตรพนักงาน NFC ผ่านเครื่องอ่าน USB</p>
+          </div>
+          <div class="bg-navy-950 rounded-2xl p-8 border border-white/[0.06] hover:border-violet-500/30 card-hover text-center fade-section stagger-4">
+            <div class="w-14 h-14 rounded-xl bg-violet-500/10 flex items-center justify-center mx-auto mb-5">
+              <svg class="w-7 h-7 text-[#8B5CF6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+            </div>
+            <h3 class="text-white font-bold text-lg mb-2">พิมพ์รหัส</h3>
+            <p class="text-slate-400 text-base md:text-lg">พิมพ์ Badge ID ด้วยคีย์บอร์ด กรณีบัตรมีปัญหา</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VOICE + CAMERA + DASHBOARD + PRIVACY -->
+  <section class="py-20 md:py-32 bg-navy-950 bg-grid">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="fade-section">
+        <div class="text-center mb-16">
+          <p class="text-[#8B5CF6] text-base font-semibold uppercase tracking-widest mb-4">Smart Features</p>
+          <h2 class="text-3xl md:text-4xl font-bold text-white" data-th="ฟีเจอร์อัจฉริยะที่ทำให้งานรู้สึก Premium" data-en="Smart Features That Make Your Event Premium">ฟีเจอร์อัจฉริยะที่ทำให้งานรู้สึก Premium</h2>
+        </div>
+        <div class="grid md:grid-cols-2 gap-6">
+          <!-- Voice Feedback -->
+          <div class="bg-navy-900 rounded-2xl p-8 border border-white/[0.06] hover:border-violet-500/30 card-hover">
+            <div class="flex items-center gap-4 mb-6">
+              <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-violet-500/20 to-[#8B5CF6]/10 border border-violet-500/20 flex items-center justify-center flex-shrink-0">
+                <svg class="w-7 h-7 text-[#8B5CF6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
+              </div>
+              <div>
+                <h3 class="text-white font-bold text-xl md:text-2xl" data-th="ระบบเสียงทักทาย อัตโนมัติ" data-en="Voice Greeting — Automatic Greeting">ระบบเสียงทักทาย อัตโนมัติ</h3>
+                <p class="text-[#8B5CF6] text-base font-semibold" data-th="ลดความผิดพลาด 99%" data-en="99% Error Reduction">ลดความผิดพลาด 99%</p>
+              </div>
+            </div>
+            <ul class="space-y-3">
+              <li class="flex gap-3 text-base md:text-lg"><svg class="w-5 h-5 text-[#8B5CF6] flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><span class="text-slate-300">เสียงทักทายอัตโนมัติเมื่อสแกนสำเร็จ</span></li>
+              <li class="flex gap-3 text-base md:text-lg"><svg class="w-5 h-5 text-[#8B5CF6] flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><span class="text-slate-300">ตั้งค่าข้อความต้อนรับ/ทักทายได้เอง</span></li>
+              <li class="flex gap-3 text-base md:text-lg"><svg class="w-5 h-5 text-[#8B5CF6] flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><span class="text-slate-300">รองรับไฟล์เสียง MP3 และ Local TTS ใช้งาน Offline ได้</span></li>
+            </ul>
+          </div>
+          <!-- Camera: Face Detection + Proximity -->
+          <div class="bg-navy-900 rounded-2xl p-8 border border-white/[0.06] hover:border-violet-500/30 card-hover">
+            <div class="flex items-center gap-4 mb-6">
+              <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-violet-500/20 to-[#8B5CF6]/10 border border-violet-500/20 flex items-center justify-center flex-shrink-0">
+                <svg class="w-7 h-7 text-[#8B5CF6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+              </div>
+              <div>
+                <h3 class="text-white font-bold text-xl md:text-2xl" data-th="กล้องอัจฉริยะ ตรวจจับและทักทายอัตโนมัติ" data-en="Smart Camera — Detect &amp; Greet Automatically">กล้องอัจฉริยะ ตรวจจับและทักทายอัตโนมัติ</h3>
+                <p class="text-[#8B5CF6] text-base font-semibold" data-th="เตรียมบัตรเร็วขึ้น 40%" data-en="40% Faster Badge Prep">เตรียมบัตรเร็วขึ้น 40%</p>
+              </div>
+            </div>
+            <ul class="space-y-3">
+              <li class="flex gap-3 text-base md:text-lg"><svg class="w-5 h-5 text-[#8B5CF6] flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><span class="text-slate-300" data-th="Face Detection (ตรวจจับใบหน้า) — รู้ว่ามีคนอยู่หน้าจอ ด้วย MediaPipe" data-en="Face Detection — knows someone is at the kiosk via MediaPipe">Face Detection (ตรวจจับใบหน้า) — รู้ว่ามีคนอยู่หน้าจอ ด้วย MediaPipe</span></li>
+              <li class="flex gap-3 text-base md:text-lg"><svg class="w-5 h-5 text-[#8B5CF6] flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><span class="text-slate-300" data-th="Proximity Detection (ตรวจจับระยะใกล้) — ทักทายอัตโนมัติเมื่อเดินเข้ามา" data-en="Proximity Detection — auto-greet when approaching the kiosk">Proximity Detection (ตรวจจับระยะใกล้) — ทักทายอัตโนมัติเมื่อเดินเข้ามา</span></li>
+              <li class="flex gap-3 text-base md:text-lg"><svg class="w-5 h-5 text-[#8B5CF6] flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><span class="text-slate-300" data-th="เปิด-ปิดแต่ละฟีเจอร์ได้อิสระ ไม่บังคับใช้กล้อง" data-en="Each feature toggleable independently — camera is optional">เปิด-ปิดแต่ละฟีเจอร์ได้อิสระ ไม่บังคับใช้กล้อง</span></li>
+            </ul>
+          </div>
+          <!-- Real-time Dashboard -->
+          <div class="bg-navy-900 rounded-2xl p-8 border border-white/[0.06] hover:border-violet-500/30 card-hover">
+            <div class="flex items-center gap-4 mb-6">
+              <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-violet-500/20 to-[#8B5CF6]/10 border border-violet-500/20 flex items-center justify-center flex-shrink-0">
+                <svg class="w-7 h-7 text-[#8B5CF6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+              </div>
+              <div>
+                <h3 class="text-white font-bold text-xl md:text-2xl" data-th="แดชบอร์ดมือถือ ดูยอดคนได้เรียลไทม์" data-en="Mobile Dashboard — Real-time Headcount">แดชบอร์ดมือถือ ดูยอดคนได้เรียลไทม์</h3>
+                <p class="text-[#8B5CF6] text-base font-semibold" data-th="ไม่จำกัดจำนวนผู้เข้าชม" data-en="Unlimited Viewers">ไม่จำกัดจำนวนผู้เข้าชม</p>
+              </div>
+            </div>
+            <ul class="space-y-3">
+              <li class="flex gap-3 text-base md:text-lg"><svg class="w-5 h-5 text-[#8B5CF6] flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><span class="text-slate-300">Live headcount ดูผ่านมือถือได้ทุกที่ทุกเวลา</span></li>
+              <li class="flex gap-3 text-base md:text-lg"><svg class="w-5 h-5 text-[#8B5CF6] flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><span class="text-slate-300">แยกยอดตามหน่วยงาน + Timeline กิจกรรม 10 นาที</span></li>
+              <li class="flex gap-3 text-base md:text-lg"><svg class="w-5 h-5 text-[#8B5CF6] flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><span class="text-slate-300">ไม่ต้อง login — แชร์ลิงก์ให้ทีมดูได้เลย</span></li>
+            </ul>
+            <img src="screenshots/dashboard-mobile.png" alt="Mobile Dashboard Preview" class="mt-5 rounded-xl border border-white/[0.06] shadow-lg w-full max-h-48 object-cover object-top" loading="lazy">
+          </div>
+          <!-- Privacy & Security -->
+          <div class="bg-navy-900 rounded-2xl p-8 border border-white/[0.06] hover:border-violet-500/30 card-hover">
+            <div class="flex items-center gap-4 mb-6">
+              <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-violet-500/20 to-[#8B5CF6]/10 border border-violet-500/20 flex items-center justify-center flex-shrink-0">
+                <svg class="w-7 h-7 text-[#8B5CF6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+              </div>
+              <div>
+                <h3 class="text-white font-bold text-xl md:text-2xl" data-th="ปลอดภัยตามมาตรฐาน PDPA" data-en="PDPA Compliant Security">ปลอดภัยตามมาตรฐาน PDPA</h3>
+                <p class="text-[#8B5CF6] text-base font-semibold" data-th="Zero PII Cloud Sync" data-en="Zero PII Cloud Sync">Zero PII Cloud Sync</p>
+              </div>
+            </div>
+            <ul class="space-y-3">
+              <li class="flex gap-3 text-base md:text-lg"><svg class="w-5 h-5 text-[#8B5CF6] flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><span class="text-slate-300">ข้อมูลชื่อเก็บในเครื่องเท่านั้น — ไม่ส่งขึ้นคลาวด์</span></li>
+              <li class="flex gap-3 text-base md:text-lg"><svg class="w-5 h-5 text-[#8B5CF6] flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><span class="text-slate-300">เฉพาะรหัสบัตร (Badge ID) ที่ sync ขึ้น Cloud</span></li>
+              <li class="flex gap-3 text-base md:text-lg"><svg class="w-5 h-5 text-[#8B5CF6] flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><span class="text-slate-300">SHA256 Encrypted Sync + Idempotent Upload</span></li>
+            </ul>
+          </div>
+          <!-- Name Search -->
+          <div class="bg-navy-900 rounded-2xl p-8 border border-white/[0.06] hover:border-violet-500/30 transition-all md:col-span-2">
+            <div class="flex items-center gap-4 mb-6">
+              <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-violet-500/20 to-[#8B5CF6]/10 border border-violet-500/20 flex items-center justify-center flex-shrink-0">
+                <svg class="w-7 h-7 text-[#8B5CF6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              </div>
+              <div>
+                <h3 class="text-white font-bold text-xl md:text-2xl" data-th="ค้นหาชื่อ-นามสกุล ไม่ใช่แค่สแกนบัตร" data-en="Name Search — Not Just Badge Scanning">ค้นหาชื่อ-นามสกุล ไม่ใช่แค่สแกนบัตร</h3>
+                <p class="text-[#8B5CF6] text-base font-semibold" data-th="เช็คอินได้แม้ลืมบัตร" data-en="Check in even without a badge">เช็คอินได้แม้ลืมบัตร</p>
+              </div>
+            </div>
+            <ul class="space-y-3">
+              <li class="flex gap-3 text-base md:text-lg"><svg class="w-5 h-5 text-[#8B5CF6] flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><span class="text-slate-300" data-th="ค้นหาผู้เข้าร่วมจากชื่อ-นามสกุล แล้วเช็คอินได้ทันที" data-en="Search attendees by first/last name and check them in instantly">ค้นหาผู้เข้าร่วมจากชื่อ-นามสกุล แล้วเช็คอินได้ทันที</span></li>
+              <li class="flex gap-3 text-base md:text-lg"><svg class="w-5 h-5 text-[#8B5CF6] flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><span class="text-slate-300" data-th="Fallback สำหรับผู้เข้าร่วมงานที่ลืมบัตร บัตรเสีย หรือมาแบบ walk-in" data-en="Fallback for guests who forgot their badge, damaged card, or walk-ins">Fallback สำหรับผู้เข้าร่วมงานที่ลืมบัตร บัตรเสีย หรือมาแบบ walk-in</span></li>
+              <li class="flex gap-3 text-base md:text-lg"><svg class="w-5 h-5 text-[#8B5CF6] flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><span class="text-slate-300" data-th="ค้นหาแบบ Fuzzy — พิมพ์บางส่วนก็เจอ ทำงาน Offline" data-en="Fuzzy search — partial typing works, fully offline">ค้นหาแบบ Fuzzy — พิมพ์บางส่วนก็เจอ ทำงาน Offline</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREENSHOTS -->
+  <section class="py-20 md:py-32 bg-navy-900">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="fade-section">
+        <div class="text-center mb-12">
+          <p class="text-[#8B5CF6] text-base font-semibold uppercase tracking-widest mb-4">Screenshots</p>
+          <h2 class="text-3xl md:text-4xl font-bold text-white" data-th="ดูหน้าตาระบบจริง" data-en="See the Real Interface">ดูหน้าตาระบบจริง</h2>
+        </div>
+        <div class="grid md:grid-cols-2 gap-8">
+          <div class="space-y-4">
+            <img src="screenshots/kiosk-ui.png" alt="TrackAttendance Kiosk Interface" class="rounded-2xl border border-white/[0.06] shadow-2xl w-full" loading="lazy">
+            <p class="text-center text-slate-300 text-lg font-semibold" data-th="หน้าจอคีออส — สแกนเข้างานได้ทันที" data-en="Kiosk Screen — Instant Check-in">หน้าจอคีออส — สแกนเข้างานได้ทันที</p>
+          </div>
+          <div class="space-y-4">
+            <img src="screenshots/dashboard-mobile.png" alt="TrackAttendance Mobile Dashboard" class="rounded-2xl border border-white/[0.06] shadow-2xl w-full" loading="lazy">
+            <p class="text-center text-slate-300 text-lg font-semibold" data-th="แดชบอร์ดมือถือ — ดูยอดคนเรียลไทม์" data-en="Mobile Dashboard — Real-time Headcount">แดชบอร์ดมือถือ — ดูยอดคนเรียลไทม์</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section id="pricing" class="py-20 md:py-32 bg-navy-950 bg-grid">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="fade-section">
+        <div class="text-center mb-16">
+          <p class="text-[#8B5CF6] text-base font-semibold uppercase tracking-widest mb-4">Pricing</p>
+          <h2 class="text-3xl md:text-4xl font-bold text-white" data-th="ราคาที่ชัดเจน ไม่มีค่าใช้จ่ายซ่อน" data-en="Transparent Pricing — No Hidden Fees">ราคาที่ชัดเจน ไม่มีค่าใช้จ่ายซ่อน</h2>
+          <p class="text-slate-400 text-lg md:text-xl mt-4" data-th="จ่ายตามจำนวนงาน ไม่ต้อง subscribe รายเดือน" data-en="Pay per event — no monthly subscription">จ่ายตามจำนวนงาน ไม่ต้อง subscribe รายเดือน</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <!-- Starter -->
+          <div class="bg-navy-900 rounded-2xl p-8 border border-white/[0.06] flex flex-col">
+            <div class="mb-8">
+              <h3 class="text-xl font-bold text-white mb-1">Starter</h3>
+              <p class="text-slate-400 text-base" data-th="สำหรับงานขนาดเล็ก" data-en="For small events">สำหรับงานขนาดเล็ก</p>
+            </div>
+            <div class="mb-8">
+              <div class="flex items-baseline gap-2">
+                <span class="text-4xl font-bold text-white">3,500</span>
+                <span class="text-[#8B5CF6] text-xl font-semibold">THB</span>
+              </div>
+              <p class="text-slate-400 text-base mt-2" data-th="ต่องาน" data-en="per event">ต่องาน</p>
+              <p class="text-slate-300 text-base mt-1" data-th="รองรับผู้เข้าร่วมไม่เกิน 300 คน" data-en="Up to 300 attendees">รองรับผู้เข้าร่วมไม่เกิน 300 คน</p>
+            </div>
+            <ul class="space-y-4 mb-10 flex-1">
+              <li class="flex items-start gap-3 text-base md:text-lg"><svg class="w-5 h-5 text-[#8B5CF6] flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><span class="text-slate-300">สถานีสแกน <span class="text-white font-bold">3 จุด</span></span></li>
+              <li class="flex items-start gap-3 text-base md:text-lg"><svg class="w-5 h-5 text-[#8B5CF6] flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><span class="text-slate-300">ผู้เข้าร่วมไม่จำกัด</span></li>
+              <li class="flex items-start gap-3 text-base md:text-lg"><svg class="w-5 h-5 text-[#8B5CF6] flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><span class="text-slate-300">Offline-First สแกน</span></li>
+              <li class="flex items-start gap-3 text-base md:text-lg"><svg class="w-5 h-5 text-[#8B5CF6] flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><span class="text-slate-300">Cloud Dashboard + Excel Export</span></li>
+            </ul>
+            <a href="#contact" class="block text-center border-2 border-white/15 hover:border-violet-500/40 text-white h-12 px-5 rounded-full font-bold text-lg transition-colors hover:bg-white/5 inline-flex items-center justify-center">ติดต่อสอบถาม</a>
+          </div>
+          <!-- Professional -->
+          <div class="rounded-2xl p-8 flex flex-col relative glow-card glow-card-animate glass-card shadow-lg shadow-violet-500/10">
+            <div class="absolute -top-3.5 left-1/2 -translate-x-1/2">
+              <span class="bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white text-sm font-bold px-5 py-1.5 rounded-full uppercase tracking-wider shadow-lg shadow-violet-500/30">แนะนำ</span>
+            </div>
+            <div class="mb-8">
+              <h3 class="text-xl font-bold text-white mb-1">Professional</h3>
+              <p class="text-slate-400 text-base" data-th="สำหรับงานขนาดกลาง-ใหญ่" data-en="For medium to large events">สำหรับงานขนาดกลาง-ใหญ่</p>
+            </div>
+            <div class="mb-8">
+              <div class="flex items-baseline gap-2">
+                <span class="text-4xl font-bold text-white">6,500</span>
+                <span class="text-[#8B5CF6] text-xl font-semibold">THB</span>
+              </div>
+              <p class="text-slate-400 text-base mt-2" data-th="ต่องาน (5 สถานี)" data-en="per event (5 stations)">ต่องาน (5 สถานี)</p>
+              <p class="text-slate-300 text-base mt-1" data-th="รองรับผู้เข้าร่วม 300-1,000 คน" data-en="300–1,000 attendees">รองรับผู้เข้าร่วม 300-1,000 คน</p>
+            </div>
+            <ul class="space-y-4 mb-10 flex-1">
+              <li class="flex items-start gap-3 text-base md:text-lg"><svg class="w-5 h-5 text-[#8B5CF6] flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><span class="text-slate-300">สถานีสแกน <span class="text-white font-bold">5 จุด</span></span></li>
+              <li class="flex items-start gap-3 text-base md:text-lg"><svg class="w-5 h-5 text-[#8B5CF6] flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><span class="text-slate-300">ทุกฟีเจอร์ใน Starter</span></li>
+              <li class="flex items-start gap-3 text-base md:text-lg"><svg class="w-5 h-5 text-[#8B5CF6] flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><span class="text-slate-300">Cross-station duplicate detection</span></li>
+              <li class="flex items-start gap-3 text-base md:text-lg"><svg class="w-5 h-5 text-[#8B5CF6] flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><span class="text-slate-300">Station monitoring + LINE support</span></li>
+            </ul>
+            <a href="#contact" class="block text-center btn-glow text-white h-12 px-5 rounded-full font-bold text-lg inline-flex items-center justify-center transition-colors">เริ่มต้นใช้งาน</a>
+          </div>
+          <!-- Enterprise -->
+          <div class="bg-navy-900 rounded-2xl p-8 border border-white/[0.06] flex flex-col">
+            <div class="mb-8">
+              <h3 class="text-xl font-bold text-white mb-1">Enterprise</h3>
+              <p class="text-slate-400 text-base" data-th="สำหรับงานขนาดใหญ่พิเศษ" data-en="For large-scale events">สำหรับงานขนาดใหญ่พิเศษ</p>
+            </div>
+            <div class="mb-8">
+              <div class="flex items-baseline gap-2">
+                <span class="text-4xl font-bold text-white">Custom</span>
+              </div>
+              <p class="text-slate-400 text-base mt-2" data-th="ตามขนาดงาน" data-en="Based on event size">ตามขนาดงาน</p>
+              <p class="text-slate-300 text-base mt-1" data-th="รองรับผู้เข้าร่วม 1,000+ คน" data-en="1,000+ attendees">รองรับผู้เข้าร่วม 1,000+ คน</p>
+            </div>
+            <ul class="space-y-4 mb-10 flex-1">
+              <li class="flex items-start gap-3 text-base md:text-lg"><svg class="w-5 h-5 text-[#8B5CF6] flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><span class="text-slate-300">สถานีสแกน <span class="text-white font-bold">10+ จุด</span></span></li>
+              <li class="flex items-start gap-3 text-base md:text-lg"><svg class="w-5 h-5 text-[#8B5CF6] flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><span class="text-slate-300">ทุกฟีเจอร์ใน Professional</span></li>
+              <li class="flex items-start gap-3 text-base md:text-lg"><svg class="w-5 h-5 text-[#8B5CF6] flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><span class="text-slate-300">On-site setup, custom branding</span></li>
+              <li class="flex items-start gap-3 text-base md:text-lg"><svg class="w-5 h-5 text-[#8B5CF6] flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><span class="text-slate-300">API access &amp; integration</span></li>
+            </ul>
+            <a href="#contact" class="block text-center border-2 border-white/15 hover:border-violet-500/40 text-white h-12 px-5 rounded-full font-bold text-lg transition-colors hover:bg-white/5 inline-flex items-center justify-center">ติดต่อเรา</a>
+          </div>
+        </div>
+        <div class="text-center mt-10">
+          <p class="text-slate-400 text-base md:text-lg">เพิ่มสถานีสแกน <span class="text-[#8B5CF6] font-bold text-lg">+1,500 THB</span> ต่อสถานี &nbsp;|&nbsp; ราคารวม VAT 7% แล้ว</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- SOCIAL PROOF -->
+  <section class="py-16 md:py-24 bg-[#0a0e1a] border-y border-white/[0.04]">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="fade-section">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div><div class="text-4xl md:text-5xl font-bold text-white mb-2">50+</div><div class="text-slate-400 text-base">งานอีเวนต์ที่รองรับ</div></div>
+          <div><div class="text-4xl md:text-5xl font-bold text-white mb-2">10K+</div><div class="text-slate-400 text-base">ครั้งที่สแกนสำเร็จ</div></div>
+          <div><div class="text-4xl md:text-5xl font-bold text-[#8B5CF6] mb-2">99.9%</div><div class="text-slate-400 text-base">ระบบพร้อมใช้งาน</div></div>
+          <div><div class="text-4xl md:text-5xl font-bold text-white mb-2">0.3s</div><div class="text-slate-400 text-base">ความเร็วต่อการสแกน</div></div>
+        </div>
+        <div class="flex flex-wrap items-center justify-center gap-6 mt-12 pt-10 border-t border-white/[0.04]">
+          <div class="flex items-center gap-2 text-slate-500 text-sm"><i data-lucide="shield-check" class="w-4 h-4"></i><span>PDPA Compliant</span></div>
+          <div class="flex items-center gap-2 text-slate-500 text-sm"><i data-lucide="cloud" class="w-4 h-4"></i><span>Google Cloud (asia-southeast1)</span></div>
+          <div class="flex items-center gap-2 text-slate-500 text-sm"><i data-lucide="lock" class="w-4 h-4"></i><span>SHA256 Encrypted Sync</span></div>
+          <div class="flex items-center gap-2 text-slate-500 text-sm"><i data-lucide="check-circle" class="w-4 h-4"></i><span>338 Automated Tests</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- USE CASES -->
+  <section class="py-20 md:py-28 bg-[#0a0e1a]">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="fade-section text-center mb-12">
+        <p class="text-[#8B5CF6] text-base font-semibold uppercase tracking-widest mb-4">ใช้ได้กับทุกงาน</p>
+        <h2 class="text-3xl md:text-4xl font-bold text-white">เหมาะกับงานอีเวนต์ทุกรูปแบบ</h2>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div class="glass-card rounded-2xl p-6 text-center hover:scale-[1.02] transition-transform"><div class="w-14 h-14 rounded-xl bg-violet-500/10 flex items-center justify-center mx-auto mb-4"><i data-lucide="building-2" class="w-7 h-7 text-violet-400"></i></div><h3 class="text-white font-bold">Corporate Seminar</h3><p class="text-slate-400 text-sm mt-1">สัมมนาองค์กร / Town Hall</p></div>
+        <div class="glass-card rounded-2xl p-6 text-center hover:scale-[1.02] transition-transform"><div class="w-14 h-14 rounded-xl bg-violet-500/10 flex items-center justify-center mx-auto mb-4"><i data-lucide="graduation-cap" class="w-7 h-7 text-violet-400"></i></div><h3 class="text-white font-bold">Graduation</h3><p class="text-slate-400 text-sm mt-1">พิธีรับปริญญา / จบหลักสูตร</p></div>
+        <div class="glass-card rounded-2xl p-6 text-center hover:scale-[1.02] transition-transform"><div class="w-14 h-14 rounded-xl bg-violet-500/10 flex items-center justify-center mx-auto mb-4"><i data-lucide="tent" class="w-7 h-7 text-violet-400"></i></div><h3 class="text-white font-bold">Exhibition</h3><p class="text-slate-400 text-sm mt-1">นิทรรศการ / งานแสดงสินค้า</p></div>
+        <div class="glass-card rounded-2xl p-6 text-center hover:scale-[1.02] transition-transform"><div class="w-14 h-14 rounded-xl bg-violet-500/10 flex items-center justify-center mx-auto mb-4"><i data-lucide="clipboard-check" class="w-7 h-7 text-violet-400"></i></div><h3 class="text-white font-bold">Training</h3><p class="text-slate-400 text-sm mt-1">อบรม จป. / CPD / Workshop</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INTERACTIVE DEMO -->
+  <section id="demo" class="py-20 md:py-32 bg-navy-900">
+    <div class="max-w-4xl mx-auto px-6">
+      <div class="fade-section">
+        <div class="text-center mb-12">
+          <p class="text-[#8B5CF6] text-base font-semibold uppercase tracking-widest mb-4">Interactive Demo</p>
+          <h2 class="text-3xl md:text-4xl font-bold text-white" data-th="ลองใช้งานจริงตอนนี้เลย" data-en="Try It Right Now">ลองใช้งานจริงตอนนี้เลย</h2>
+          <p class="text-slate-400 text-lg md:text-xl mt-4" data-th="คลิกปุ่มสแกนหรือพิมพ์รหัสบัตร ดูการทำงานแบบ Offline-First" data-en="Click scan or type a badge ID — see Offline-First in action">คลิกปุ่มสแกนหรือพิมพ์รหัสบัตร ดูการทำงานแบบ Offline-First</p>
+        </div>
+
+        <!-- Kiosk Simulator -->
+        <div class="kiosk-frame rounded-2xl border border-white/[0.06] overflow-hidden shadow-2xl shadow-black/40" style="box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04)">
+          <!-- Kiosk title bar -->
+          <div class="flex items-center justify-between px-5 py-3 bg-[#0f172a] border-b border-white/[0.06]">
+            <div class="flex items-center gap-2.5">
+              <div class="w-7 h-7 rounded bg-gradient-to-br from-violet-600 to-fuchsia-500 flex items-center justify-center">
+                <span class="text-white font-bold text-xs">T</span>
+              </div>
+              <span class="text-slate-400 text-sm font-semibold">TrackAttendance Kiosk — Gate A</span>
+            </div>
+            <div id="demo-wifi" class="flex items-center gap-1.5 text-sm transition-colors">
+              <span id="demo-wifi-dot" class="w-2 h-2 rounded-full bg-[#8B5CF6]"></span>
+              <span id="demo-wifi-text" class="text-[#8B5CF6] font-medium">Online</span>
+            </div>
+          </div>
+
+          <!-- Kiosk body -->
+          <div class="p-6 md:p-8 space-y-6">
+            <!-- Scan input area -->
+            <div class="flex gap-3">
+              <input id="demo-input" type="text" placeholder="พิมพ์รหัสบัตร เช่น EMP-001, EMP-002..." class="flex-1 bg-[#0f172a] border border-white/[0.06] rounded-xl px-4 h-12 text-white placeholder-slate-500 text-lg focus:outline-none focus:border-violet-500/50 transition-colors font-mono">
+              <button id="demo-scan-btn" class="btn-glow text-white h-12 px-6 rounded-full font-bold text-base transition-colors whitespace-nowrap">Scan</button>
+            </div>
+
+            <!-- Quick scan buttons -->
+            <div class="flex flex-wrap gap-2">
+              <button class="demo-quick-scan bg-white/5 hover:bg-white/10 border border-white/[0.06] text-slate-300 px-3 py-1.5 rounded-lg text-sm font-mono transition-colors" data-badge="EMP-001">EMP-001</button>
+              <button class="demo-quick-scan bg-white/5 hover:bg-white/10 border border-white/[0.06] text-slate-300 px-3 py-1.5 rounded-lg text-sm font-mono transition-colors" data-badge="EMP-002">EMP-002</button>
+              <button class="demo-quick-scan bg-white/5 hover:bg-white/10 border border-white/[0.06] text-slate-300 px-3 py-1.5 rounded-lg text-sm font-mono transition-colors" data-badge="EMP-003">EMP-003</button>
+              <button class="demo-quick-scan bg-white/5 hover:bg-white/10 border border-white/[0.06] text-slate-300 px-3 py-1.5 rounded-lg text-sm font-mono transition-colors" data-badge="EMP-004">EMP-004</button>
+              <button class="demo-quick-scan bg-white/5 hover:bg-white/10 border border-white/[0.06] text-slate-300 px-3 py-1.5 rounded-lg text-sm font-mono transition-colors" data-badge="EMP-005">EMP-005</button>
+              <button id="demo-wifi-toggle" class="ml-auto bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors">WiFi OFF</button>
+            </div>
+
+            <!-- Result display -->
+            <div id="demo-result" class="min-h-[140px] rounded-xl bg-[#0f172a] border border-white/[0.06] p-5 flex items-center justify-center">
+              <p class="text-slate-500 text-lg text-center">สแกนบัตรเพื่อเริ่มเช็คอิน<br><span class="text-sm">Click a badge above or type and press Enter</span></p>
+            </div>
+
+            <!-- Stats bar -->
+            <div class="grid grid-cols-3 gap-4">
+              <div class="bg-[#0f172a] rounded-xl p-4 border border-white/[0.06] text-center">
+                <div id="demo-count" class="text-3xl font-bold text-white">0</div>
+                <div class="text-slate-400 text-sm mt-1">เช็คอินแล้ว</div>
+              </div>
+              <div class="bg-[#0f172a] rounded-xl p-4 border border-white/[0.06] text-center">
+                <div id="demo-pending" class="text-3xl font-bold text-amber-400">0</div>
+                <div class="text-slate-400 text-sm mt-1">รอซิงก์</div>
+              </div>
+              <div class="bg-[#0f172a] rounded-xl p-4 border border-white/[0.06] text-center">
+                <div id="demo-synced" class="text-3xl font-bold text-[#8B5CF6]">0</div>
+                <div class="text-slate-400 text-sm mt-1">ซิงก์แล้ว</div>
+              </div>
+            </div>
+
+            <!-- Event log -->
+            <div id="demo-log" class="space-y-2 max-h-40 overflow-y-auto text-sm"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOCIAL PROOF -->
+  <section class="py-16 md:py-20 bg-navy-950 border-y border-white/5">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="fade-section">
+        <p class="text-center text-slate-400 text-base font-semibold uppercase tracking-widest mb-10" data-th="ออกแบบมาสำหรับ" data-en="Built For">ออกแบบมาสำหรับ</p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div><div class="w-12 h-12 rounded-xl bg-violet-500/10 flex items-center justify-center mx-auto mb-3"><i data-lucide="building-2" class="w-6 h-6 text-violet-400"></i></div><p class="text-slate-300 text-base md:text-lg font-semibold">งานสัมมนาองค์กร</p></div>
+          <div><div class="w-12 h-12 rounded-xl bg-violet-500/10 flex items-center justify-center mx-auto mb-3"><i data-lucide="graduation-cap" class="w-6 h-6 text-violet-400"></i></div><p class="text-slate-300 text-base md:text-lg font-semibold">งานรับปริญญา</p></div>
+          <div><div class="w-12 h-12 rounded-xl bg-violet-500/10 flex items-center justify-center mx-auto mb-3"><i data-lucide="tent" class="w-6 h-6 text-violet-400"></i></div><p class="text-slate-300 text-base md:text-lg font-semibold">งานอีเว้นท์</p></div>
+          <div><div class="w-12 h-12 rounded-xl bg-violet-500/10 flex items-center justify-center mx-auto mb-3"><i data-lucide="stethoscope" class="w-6 h-6 text-violet-400"></i></div><p class="text-slate-300 text-base md:text-lg font-semibold">งานประชุมวิชาการ</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact" class="py-20 md:py-32 bg-navy-900">
+    <div class="max-w-3xl mx-auto px-6">
+      <div class="fade-section">
+        <div class="text-center mb-12">
+          <p class="text-[#8B5CF6] text-base font-semibold uppercase tracking-widest mb-4">Contact</p>
+          <h2 class="text-3xl md:text-4xl font-bold text-white" data-th="พร้อมเริ่มต้นใช้งาน?" data-en="Ready to Get Started?">พร้อมเริ่มต้นใช้งาน?</h2>
+          <p class="text-slate-400 text-lg md:text-xl mt-4 max-w-lg mx-auto" data-th="แอดไลน์เพื่อนัดดูเดโม่ฟรี หรือขอใบเสนอราคา" data-en="Add LINE for a free demo or get a quote">แอดไลน์เพื่อนัดดูเดโม่ฟรี หรือขอใบเสนอราคา</p>
+        </div>
+        <div class="bg-navy-950 rounded-2xl p-8 sm:p-10 border border-white/[0.06] text-center">
+          <div class="mb-10">
+            <a href="#" class="inline-flex items-center gap-3 bg-[#06C755] hover:bg-[#05b34d] text-white h-14 px-8 rounded-full font-bold text-xl transition-all hover:shadow-xl hover:shadow-[#06C755]/25 hover:-translate-y-0.5">
+              <svg class="w-8 h-8" viewBox="0 0 24 24" fill="currentColor"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+              <span data-th="แอดไลน์สอบถาม" data-en="Chat on LINE">แอดไลน์สอบถาม</span>
+            </a>
+          </div>
+          <div class="flex items-center gap-4 mb-10">
+            <div class="flex-1 h-px bg-white/10"></div>
+            <span class="text-slate-500 text-base font-medium" data-th="หรือ" data-en="or">หรือ</span>
+            <div class="flex-1 h-px bg-white/10"></div>
+          </div>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div class="flex items-center gap-4 bg-navy-900 border border-white/[0.06] rounded-2xl p-5">
+              <div class="w-12 h-12 rounded-xl bg-violet-500/10 flex items-center justify-center flex-shrink-0">
+                <svg class="w-6 h-6 text-[#8B5CF6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+              </div>
+              <div class="text-left">
+                <p class="text-slate-400 text-sm font-medium">Email</p>
+                <p class="text-white text-base md:text-lg font-semibold">contact@trackattendance.com</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-4 bg-navy-900 border border-white/[0.06] rounded-2xl p-5">
+              <div class="w-12 h-12 rounded-xl bg-violet-500/10 flex items-center justify-center flex-shrink-0">
+                <svg class="w-6 h-6 text-[#8B5CF6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+              </div>
+              <div class="text-left">
+                <p class="text-slate-400 text-sm font-medium">โทรศัพท์</p>
+                <p class="text-white text-base md:text-lg font-semibold">0XX-XXX-XXXX</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="py-10 bg-navy-950 border-t border-white/5">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-7 h-7 rounded-md bg-gradient-to-br from-violet-600 to-fuchsia-500 flex items-center justify-center">
+            <span class="text-white font-bold text-xs">T</span>
+          </div>
+          <span class="text-slate-400 text-base font-semibold">TrackAttendance</span>
+        </div>
+        <p class="text-slate-500 text-base" data-th="ระบบเช็คอินอีเวนต์ออฟไลน์ สแกนไวปานสายฟ้า เน็ตล่มงานก็ไม่สะดุด" data-en="Offline-First Event Check-in. Lightning Fast. Zero Downtime.">&copy; 2026 TrackAttendance &mdash; ระบบเช็คอินอีเวนต์ออฟไลน์ สแกนไวปานสายฟ้า</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile menu
+    const menuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    menuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    mobileMenu.querySelectorAll('a').forEach(link => link.addEventListener('click', () => mobileMenu.classList.add('hidden')));
+
+    // Scroll fade-in
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.fade-section').forEach(el => observer.observe(el));
+
+    // Navbar scroll
+    const nav = document.querySelector('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('border-white/15', window.scrollY > 20);
+    });
+
+    // Theme toggle (dark/light)
+    const themeToggle = document.getElementById('theme-toggle');
+    function setTheme(dark) {
+      document.documentElement.classList.toggle('dark', dark);
+      localStorage.setItem('theme', dark ? 'dark' : 'light');
+      // Re-render Lucide icons for dark/light visibility
+      if (window.lucide) lucide.createIcons();
+    }
+    // Load saved preference
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') setTheme(false);
+    if (themeToggle) themeToggle.addEventListener('click', () => {
+      setTheme(!document.documentElement.classList.contains('dark'));
+    });
+
+    // Language toggle (TH/EN)
+    let currentLang = 'th';
+    const langToggle = document.getElementById('lang-toggle');
+    const langLabel = document.getElementById('lang-label');
+    const langToggleMobile = document.getElementById('lang-toggle-mobile');
+
+    function setLang(lang) {
+      currentLang = lang;
+      document.documentElement.lang = lang;
+      document.querySelectorAll('[data-th][data-en]').forEach(el => {
+        el.innerHTML = el.dataset[lang];
+      });
+      if (langLabel) langLabel.textContent = lang === 'th' ? 'EN' : 'TH';
+      if (langToggleMobile) langToggleMobile.textContent = lang === 'th' ? '🌐 Switch to English' : '🌐 เปลี่ยนเป็นภาษาไทย';
+    }
+
+    if (langToggle) langToggle.addEventListener('click', () => setLang(currentLang === 'th' ? 'en' : 'th'));
+    if (langToggleMobile) langToggleMobile.addEventListener('click', () => { setLang(currentLang === 'th' ? 'en' : 'th'); mobileMenu.classList.add('hidden'); });
+
+    // ==================== TYPEWRITER ====================
+    const twEl = document.getElementById('typewriter-line');
+    const twPhrases = ['ระบบเช็คอินหน้างาน', 'On-site Check-in', 'Event Registration'];
+    let twIdx = 0, twCharIdx = 0, twDeleting = false;
+    function twTick() {
+      const phrase = twPhrases[twIdx];
+      if (!twDeleting) {
+        twEl.textContent = phrase.slice(0, ++twCharIdx);
+        if (twCharIdx === phrase.length) { setTimeout(() => { twDeleting = true; twTick(); }, 2000); return; }
+      } else {
+        twEl.textContent = phrase.slice(0, --twCharIdx);
+        if (twCharIdx === 0) { twDeleting = false; twIdx = (twIdx + 1) % twPhrases.length; }
+      }
+      setTimeout(twTick, twDeleting ? 30 : 80);
+    }
+    setTimeout(twTick, 2000);
+
+    // ==================== INTERACTIVE DEMO ====================
+    const ATTENDEES = {
+      'EMP-001': { name: 'สมชาย วงศ์สวัสดิ์', en: 'Somchai Wongsawat', dept: 'Engineering' },
+      'EMP-002': { name: 'นิดา แสงทอง', en: 'Nida Saengthong', dept: 'Marketing' },
+      'EMP-003': { name: 'ประวิทย์ ชัยชนะ', en: 'Prawit Chaichana', dept: 'Sales' },
+      'EMP-004': { name: 'มาลี จันทร์ศรี', en: 'Malee Chansri', dept: 'HR' },
+      'EMP-005': { name: 'อนุชา สุขสันต์', en: 'Anucha Suksan', dept: 'Finance' },
+    };
+    const scanned = new Set();
+    let demoWifi = true, pendingCount = 0, syncedCount = 0;
+    const demoInput = document.getElementById('demo-input');
+    const demoResult = document.getElementById('demo-result');
+    const demoCount = document.getElementById('demo-count');
+    const demoPending = document.getElementById('demo-pending');
+    const demoSynced = document.getElementById('demo-synced');
+    const demoLog = document.getElementById('demo-log');
+    const demoWifiDot = document.getElementById('demo-wifi-dot');
+    const demoWifiText = document.getElementById('demo-wifi-text');
+
+    function bumpEl(el) { el.classList.remove('counter-bump'); void el.offsetWidth; el.classList.add('counter-bump'); }
+
+    function addLog(msg, color = 'text-slate-400') {
+      const t = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const div = document.createElement('div');
+      div.className = `flex justify-between ${color} slide-up`;
+      div.innerHTML = `<span>${msg}</span><span class="text-slate-600">${t}</span>`;
+      demoLog.prepend(div);
+      if (demoLog.children.length > 8) demoLog.lastChild.remove();
+    }
+
+    function doScan(badgeId) {
+      const badge = badgeId.trim().toUpperCase();
+      if (!badge) return;
+      const person = ATTENDEES[badge];
+
+      if (!person) {
+        demoResult.innerHTML = `<div class="text-center slide-up"><p class="text-red-400 text-2xl font-bold mb-2">ไม่พบข้อมูล</p><p class="text-slate-400 text-lg font-mono">${badge}</p></div>`;
+        addLog(`Badge ${badge} — ไม่พบในระบบ`, 'text-red-400');
+        return;
+      }
+
+      if (scanned.has(badge)) {
+        demoResult.innerHTML = `<div class="text-center slide-up"><p class="text-amber-400 text-2xl font-bold mb-2">สแกนซ้ำ!</p><p class="text-white text-xl">${person.name}</p><p class="text-slate-400 text-lg">เช็คอินแล้วก่อนหน้านี้</p></div>`;
+        addLog(`${badge} ${person.name} — สแกนซ้ำ`, 'text-amber-400');
+        return;
+      }
+
+      scanned.add(badge);
+      const count = scanned.size;
+      demoCount.textContent = count;
+      bumpEl(demoCount);
+
+      // Flash effect on result
+      demoResult.classList.add('scan-flash');
+      setTimeout(() => demoResult.classList.remove('scan-flash'), 300);
+
+      demoResult.innerHTML = `
+        <div class="text-center slide-up space-y-3">
+          <div class="w-16 h-16 rounded-full bg-[#8B5CF6]/20 flex items-center justify-center mx-auto">
+            <svg class="w-8 h-8 text-[#8B5CF6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          </div>
+          <p class="text-white text-2xl font-bold">${person.name}</p>
+          <p class="text-slate-400 text-lg">${person.dept} &middot; <span class="font-mono text-sm">${badge}</span></p>
+          <p class="text-[#8B5CF6] text-base font-semibold">🔊 "สวัสดีค่ะ คุณ${person.name.split(' ')[0]}"</p>
+        </div>`;
+
+      if (demoWifi) {
+        syncedCount++;
+        demoSynced.textContent = syncedCount;
+        bumpEl(demoSynced);
+        addLog(`${badge} ${person.name} — เช็คอิน + ซิงก์แล้ว`, 'text-[#8B5CF6]');
+      } else {
+        pendingCount++;
+        demoPending.textContent = pendingCount;
+        bumpEl(demoPending);
+        addLog(`${badge} ${person.name} — เช็คอิน (รอซิงก์)`, 'text-amber-400');
+      }
+      demoInput.value = '';
+    }
+
+    // Scan button + Enter key
+    document.getElementById('demo-scan-btn').addEventListener('click', () => doScan(demoInput.value));
+    demoInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') doScan(demoInput.value); });
+
+    // Quick scan buttons
+    document.querySelectorAll('.demo-quick-scan').forEach(btn => {
+      btn.addEventListener('click', () => doScan(btn.dataset.badge));
+    });
+
+    // WiFi toggle
+    document.getElementById('demo-wifi-toggle').addEventListener('click', function() {
+      demoWifi = !demoWifi;
+      if (demoWifi) {
+        demoWifiDot.className = 'w-2 h-2 rounded-full bg-[#8B5CF6]';
+        demoWifiText.className = 'text-[#8B5CF6] font-medium';
+        demoWifiText.textContent = 'Online';
+        this.textContent = 'WiFi OFF';
+        this.className = 'ml-auto bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors';
+        // Auto-sync pending
+        if (pendingCount > 0) {
+          addLog(`ซิงก์ข้อมูลที่ค้าง ${pendingCount} รายการ...`, 'text-violet-400');
+          setTimeout(() => {
+            syncedCount += pendingCount;
+            demoSynced.textContent = syncedCount;
+            bumpEl(demoSynced);
+            pendingCount = 0;
+            demoPending.textContent = '0';
+            addLog(`ซิงก์สำเร็จ! ข้อมูลทั้งหมดอัปเดตแล้ว`, 'text-[#8B5CF6]');
+          }, 800);
+        }
+      } else {
+        demoWifiDot.className = 'w-2 h-2 rounded-full bg-red-400 wifi-pulse';
+        demoWifiText.className = 'text-red-400 font-medium';
+        demoWifiText.textContent = 'Offline';
+        this.textContent = 'WiFi ON';
+        this.className = 'ml-auto bg-[#8B5CF6]/10 hover:bg-[#8B5CF6]/20 border border-[#8B5CF6]/20 text-[#8B5CF6] px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors';
+        addLog('WiFi ถูกตัด — ระบบทำงานต่อแบบ Offline', 'text-red-400');
+      }
+    });
+  </script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>

@@ -6,19 +6,33 @@ import rateLimit from "@fastify/rate-limit";
 import fastifyStatic from "@fastify/static";
 import path from "path";
 import 'dotenv/config';
+import invoiceRoute from './invoice-route';
 
 // ---- config ----
 if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL environment variable is required");
 }
 if (!process.env.API_KEY) {
-  throw new Error("API_KEY environment variable is required");
+  console.warn("API_KEY not set — master key auth disabled, license-key auth only");
 }
+
+// ---- request tenant context ----
+type TenantContext = {
+  tenantId: string;
+  licenseId: string;
+  eventName: string;
+  maxStations: number;
+  isMasterKey: false;
+} | {
+  isMasterKey: true;
+};
 
 const app = Fastify({
   logger: true,
   requestTimeout: 30000
 });
+
+// Tenant context is attached to request via (req as any).tenant in auth hook
 
 // ---- database pool ----
 const pool = new pg.Pool({
@@ -32,7 +46,7 @@ pool.on('error', (err) => {
   console.error('Database pool error:', err);
 });
 
-const API_KEY = process.env.API_KEY;
+const API_KEY = process.env.API_KEY || null;
 const RATE_LIMIT_MAX = parseInt(process.env.RATE_LIMIT_MAX || "60", 10);
 const RATE_LIMIT_WINDOW = process.env.RATE_LIMIT_WINDOW || "1 minute";
 const PUBLIC_RATE_LIMIT_MAX = parseInt(process.env.PUBLIC_RATE_LIMIT_MAX || "30", 10);
@@ -139,7 +153,41 @@ try {
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_scans_station_scanned_at ON scans (station_name, scanned_at DESC)
     `);
-    app.log.info("Database migration check complete");
+
+    // ---- Sprint 1 Week 1: Multi-tenant tables ----
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS tenants (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name VARCHAR(255) NOT NULL,
+        contact_email VARCHAR(255),
+        created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS licenses (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        tenant_id UUID NOT NULL REFERENCES tenants(id),
+        license_key VARCHAR(64) UNIQUE NOT NULL,
+        event_name VARCHAR(255) NOT NULL,
+        max_stations INTEGER NOT NULL DEFAULT 3,
+        status VARCHAR(50) NOT NULL DEFAULT 'active',
+        valid_from TIMESTAMPTZ NOT NULL,
+        valid_until TIMESTAMPTZ NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+      )
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_licenses_tenant ON licenses (tenant_id)`);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_licenses_key ON licenses (license_key)`);
+    await client.query(`ALTER TABLE licenses ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT now()`);
+
+    // Add tenant_id to existing tables (nullable for backward compat with existing data)
+    await client.query(`ALTER TABLE scans ADD COLUMN IF NOT EXISTS tenant_id UUID REFERENCES tenants(id)`);
+    await client.query(`ALTER TABLE roster_summary ADD COLUMN IF NOT EXISTS tenant_id UUID REFERENCES tenants(id)`);
+    await client.query(`ALTER TABLE roster_meta ADD COLUMN IF NOT EXISTS tenant_id UUID REFERENCES tenants(id)`);
+    await client.query(`ALTER TABLE station_heartbeat ADD COLUMN IF NOT EXISTS tenant_id UUID REFERENCES tenants(id)`);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_scans_tenant ON scans (tenant_id)`);
+
+    app.log.info("Database migration check complete (including multi-tenant)");
   } finally {
     client.release();
   }
@@ -167,6 +215,9 @@ await app.register(fastifyStatic, {
   prefix: '/dashboard/',
   decorateReply: false,
 });
+
+// ---- invoice PDF generation ----
+await app.register(invoiceRoute);
 
 // ---- health (with in-memory cache to avoid DB hit on every probe) ----
 let healthCache: { ok: boolean; db: string; ts: number } | null = null;
@@ -223,15 +274,58 @@ app.addHook("onRequest", async (req, reply) => {
 
   const auth = req.headers.authorization || "";
   const token = auth.toLowerCase().startsWith("bearer ") ? auth.slice(7) : "";
-  if (!token || !API_KEY) {
+  if (!token) {
     reply.code(401);
     throw new Error("Unauthorized");
   }
-  const tokenBuf = Buffer.from(token);
-  const keyBuf = Buffer.from(API_KEY);
-  if (tokenBuf.length !== keyBuf.length || !crypto.timingSafeEqual(tokenBuf, keyBuf)) {
-    reply.code(401);
-    throw new Error("Unauthorized");
+
+  // 1. Check master key (API_KEY env var) — backward compat
+  if (API_KEY) {
+    const tokenBuf = Buffer.from(token);
+    const keyBuf = Buffer.from(API_KEY);
+    if (tokenBuf.length === keyBuf.length && crypto.timingSafeEqual(tokenBuf, keyBuf)) {
+      (req as any).tenant = { isMasterKey: true } as TenantContext;
+      return;
+    }
+  }
+
+  // 2. Look up license key in DB
+  const client = await pool.connect();
+  try {
+    const result = await client.query(
+      `SELECT l.id, l.tenant_id, l.event_name, l.max_stations, l.status, l.valid_from, l.valid_until
+       FROM licenses l
+       WHERE l.license_key = $1
+       LIMIT 1`,
+      [token]
+    );
+
+    if (result.rows.length === 0) {
+      reply.code(401);
+      throw new Error("Unauthorized");
+    }
+
+    const lic = result.rows[0];
+    if (lic.status !== 'active') {
+      reply.code(403);
+      throw new Error("Forbidden");
+    }
+
+    const now = new Date();
+    if (now < new Date(lic.valid_from) || now > new Date(lic.valid_until)) {
+      reply.code(403);
+      throw new Error("Forbidden");
+    }
+
+    (req as any).tenant = {
+      tenantId: lic.tenant_id,
+      licenseId: lic.id,
+      eventName: lic.event_name,
+      maxStations: lic.max_stations,
+      isMasterKey: false,
+    } as TenantContext;
+  } finally {
+    client.release();
   }
 });
 
@@ -399,6 +493,10 @@ app.post<BatchRequest>("/v1/scans/batch", { schema: batchSchema }, async (req, r
     }
   }
 
+  // Resolve tenant_id from auth context
+  const tenant = (req as any).tenant as TenantContext | null;
+  const tenantId = (tenant && !tenant.isMasterKey) ? tenant.tenantId : null;
+
   const client = await pool.connect();
   try {
     await client.query("begin");
@@ -410,6 +508,7 @@ app.post<BatchRequest>("/v1/scans/batch", { schema: batchSchema }, async (req, r
     const metas: any[] = [];
     const businessUnits: (string | null)[] = [];
     const scanSources: string[] = [];
+    const tenantIds: (string | null)[] = [];
 
     for (const ev of events) {
       keys.push(ev.idempotency_key);
@@ -425,11 +524,12 @@ app.post<BatchRequest>("/v1/scans/batch", { schema: batchSchema }, async (req, r
       businessUnits.push(ev.business_unit ?? null);
       const src = ev.scan_source ?? "manual";
       scanSources.push(src);
+      tenantIds.push(tenantId);
     }
 
     const insertSql = `
       insert into scans
-        (idempotency_key, badge_id, station_name, scanned_at, meta, business_unit, scan_source)
+        (idempotency_key, badge_id, station_name, scanned_at, meta, business_unit, scan_source, tenant_id)
       select *
       from unnest(
         $1::text[],
@@ -438,7 +538,8 @@ app.post<BatchRequest>("/v1/scans/batch", { schema: batchSchema }, async (req, r
         $4::timestamptz[],
         $5::jsonb[],
         $6::text[],
-        $7::text[]
+        $7::text[],
+        $8::uuid[]
       )
       on conflict (idempotency_key) do nothing
       returning idempotency_key
@@ -452,6 +553,7 @@ app.post<BatchRequest>("/v1/scans/batch", { schema: batchSchema }, async (req, r
       metas,
       businessUnits,
       scanSources,
+      tenantIds,
     ]);
 
     await client.query("commit");
@@ -483,18 +585,37 @@ app.post<BatchRequest>("/v1/scans/batch", { schema: batchSchema }, async (req, r
   }
 });
 
+// ---- tenant filter helper ----
+// Returns { clause, params } for tenant-scoped queries.
+// Master key: no filter. License key: WHERE tenant_id = $N.
+function tenantFilter(req: any, paramOffset = 1): { clause: string; params: any[]; nextParam: number } {
+  const tenant = req.tenant as TenantContext | null;
+  if (!tenant || tenant.isMasterKey) {
+    return { clause: "", params: [], nextParam: paramOffset };
+  }
+  return { clause: `WHERE tenant_id = $${paramOffset}`, params: [tenant.tenantId], nextParam: paramOffset + 1 };
+}
+function tenantAndClause(req: any, paramOffset: number): { clause: string; params: any[]; nextParam: number } {
+  const tenant = req.tenant as TenantContext | null;
+  if (!tenant || tenant.isMasterKey) {
+    return { clause: "", params: [], nextParam: paramOffset };
+  }
+  return { clause: `AND tenant_id = $${paramOffset}`, params: [tenant.tenantId], nextParam: paramOffset + 1 };
+}
+
 // ---- dashboard endpoints ----
 
 // GET /v1/dashboard/stats - Authenticated aggregated stats
 app.get("/v1/dashboard/stats", async (req, reply) => {
+  const tf = tenantFilter(req);
   const client = await pool.connect();
   try {
     const summaryResult = await client.query(`
       SELECT
         COUNT(*) as total_scans,
         COUNT(DISTINCT badge_id) as unique_badges
-      FROM scans
-    `);
+      FROM scans ${tf.clause}
+    `, tf.params);
 
     const stationsResult = await client.query(`
       SELECT
@@ -502,16 +623,16 @@ app.get("/v1/dashboard/stats", async (req, reply) => {
         COUNT(*) as total_scans,
         COUNT(DISTINCT badge_id) as unique_badges,
         MAX(scanned_at) as last_scan
-      FROM scans
+      FROM scans ${tf.clause}
       GROUP BY station_name
       ORDER BY station_name ASC
-    `);
+    `, tf.params);
 
     const buResult = await client.query(`
       WITH scan_bu AS (
         SELECT COALESCE(business_unit, 'Unmatched') AS bu,
                COUNT(DISTINCT badge_id) AS unique_badges
-        FROM scans
+        FROM scans ${tf.clause}
         GROUP BY COALESCE(business_unit, 'Unmatched')
       )
       SELECT
@@ -522,7 +643,7 @@ app.get("/v1/dashboard/stats", async (req, reply) => {
       FULL OUTER JOIN roster_summary r ON s.bu = r.business_unit
       ORDER BY CASE WHEN COALESCE(s.bu, r.business_unit, 'Unmatched') = 'Unmatched' THEN 1 ELSE 0 END,
                COALESCE(s.bu, r.business_unit, 'Unmatched') ASC
-    `);
+    `, tf.params);
 
     const summary = summaryResult.rows[0];
     const stations = stationsResult.rows.map(row => ({
@@ -707,6 +828,8 @@ interface ExportQuery {
 
 app.get<ExportQuery>("/v1/dashboard/export", async (req, reply) => {
   const limit = Math.min(parseInt(req.query.limit || "100000"), 100000);
+  const tf = tenantFilter(req);
+  const limitParam = tf.nextParam;
 
   const client = await pool.connect();
   try {
@@ -719,10 +842,10 @@ app.get<ExportQuery>("/v1/dashboard/export", async (req, reply) => {
         meta->>'legacy_id' as legacy_id,
         business_unit,
         scan_source
-      FROM scans
+      FROM scans ${tf.clause}
       ORDER BY scanned_at ASC
-      LIMIT $1
-    `, [limit]);
+      LIMIT $${limitParam}
+    `, [...tf.params, limit]);
 
     const scans = result.rows.map(row => ({
       badge_id: row.badge_id,
@@ -751,9 +874,10 @@ app.get<ExportQuery>("/v1/dashboard/export", async (req, reply) => {
 // ---- admin endpoints ----
 
 app.get("/v1/admin/scan-count", async (req, reply) => {
+  const tf = tenantFilter(req);
   const client = await pool.connect();
   try {
-    const result = await client.query("SELECT COUNT(*) as count FROM scans");
+    const result = await client.query(`SELECT COUNT(*) as count FROM scans ${tf.clause}`, tf.params);
     return {
       count: parseInt(result.rows[0].count),
       timestamp: new Date().toISOString(),
@@ -860,6 +984,101 @@ app.delete("/v1/admin/clear-station", async (req, reply) => {
   }
 });
 
+// POST /v1/admin/create-license — create a tenant + license (master key only)
+app.post("/v1/admin/create-license", async (req, reply) => {
+  // Only master key can create licenses
+  const tenant = (req as any).tenant as TenantContext | null;
+  if (!tenant || !tenant.isMasterKey) {
+    reply.code(403);
+    return { error: "Master key required" };
+  }
+
+  const body = req.body as any;
+  const tenant_name = body?.tenant_name;
+  const contact_email = body?.contact_email || null;
+  const event_name = body?.event_name;
+  const max_stations = body?.max_stations !== undefined ? parseInt(body.max_stations) : 3;
+  if (isNaN(max_stations) || max_stations < 1 || max_stations > 100) {
+    reply.code(400);
+    return { error: "max_stations must be between 1 and 100" };
+  }
+  const valid_from = body?.valid_from;
+  const valid_until = body?.valid_until;
+  const tenant_id = body?.tenant_id || null; // optional: reuse existing tenant
+
+  if (!event_name || typeof event_name !== "string") {
+    reply.code(400);
+    return { error: "event_name is required" };
+  }
+  if (!valid_from || !valid_until) {
+    reply.code(400);
+    return { error: "valid_from and valid_until are required (ISO 8601)" };
+  }
+  if (isNaN(new Date(valid_from).getTime()) || isNaN(new Date(valid_until).getTime())) {
+    reply.code(400);
+    return { error: "valid_from and valid_until must be valid ISO 8601 dates" };
+  }
+  if (!tenant_id && (!tenant_name || typeof tenant_name !== "string")) {
+    reply.code(400);
+    return { error: "tenant_name is required when not providing tenant_id" };
+  }
+  if (tenant_id && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(tenant_id)) {
+    reply.code(400);
+    return { error: "tenant_id must be a valid UUID" };
+  }
+
+  // Generate a random license key (32 hex chars)
+  const licenseKey = crypto.randomBytes(16).toString("hex");
+
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    let resolvedTenantId = tenant_id;
+    if (!resolvedTenantId) {
+      const tenantResult = await client.query(
+        `INSERT INTO tenants (name, contact_email) VALUES ($1, $2) RETURNING id`,
+        [tenant_name, contact_email]
+      );
+      resolvedTenantId = tenantResult.rows[0].id;
+    }
+
+    const licResult = await client.query(
+      `INSERT INTO licenses (tenant_id, license_key, event_name, max_stations, valid_from, valid_until)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING id, license_key, event_name, max_stations, status, valid_from, valid_until, created_at`,
+      [resolvedTenantId, licenseKey, event_name, max_stations, valid_from, valid_until]
+    );
+
+    await client.query("COMMIT");
+
+    const lic = licResult.rows[0];
+    app.log.info({ tenant_id: resolvedTenantId, license_id: lic.id }, "License created");
+
+    return {
+      ok: true,
+      tenant_id: resolvedTenantId,
+      license: {
+        id: lic.id,
+        license_key: lic.license_key,
+        event_name: lic.event_name,
+        max_stations: lic.max_stations,
+        status: lic.status,
+        valid_from: lic.valid_from,
+        valid_until: lic.valid_until,
+        created_at: lic.created_at,
+      },
+    };
+  } catch (e: any) {
+    try { await client.query("ROLLBACK"); } catch {}
+    app.log.error({ err: e }, "Create license failed");
+    reply.code(500);
+    return { ok: false, error: "Failed to create license" };
+  } finally {
+    client.release();
+  }
+});
+
 // ---- station heartbeat & status ----
 
 // POST /v1/stations/heartbeat — station reports its status (authenticated)
@@ -874,17 +1093,51 @@ app.post("/v1/stations/heartbeat", async (req, reply) => {
   const last_clear_epoch = body?.last_clear_epoch || null;
   const local_scan_count = parseInt(body?.local_scan_count) || 0;
 
+  const tenant = (req as any).tenant as TenantContext | null;
+  const tenantId = (tenant && !tenant.isMasterKey) ? tenant.tenantId : null;
+
   const client = await pool.connect();
   try {
+    // Enforce station limit for license-key authenticated requests
+    if (tenant && !tenant.isMasterKey) {
+      const existing = await client.query(
+        `SELECT station_name FROM station_heartbeat
+         WHERE tenant_id = $1 AND last_seen_at >= NOW() - INTERVAL '5 minutes'`,
+        [tenantId]
+      );
+      const activeStations = new Set(existing.rows.map(r => r.station_name));
+      activeStations.add(station_name); // include current station
+      if (activeStations.size > tenant.maxStations) {
+        reply.code(403);
+        return {
+          ok: false,
+          error: "Station limit exceeded",
+          max_stations: tenant.maxStations,
+          active_stations: activeStations.size,
+        };
+      }
+    }
+
     await client.query(`
-      INSERT INTO station_heartbeat (station_name, last_clear_epoch, local_scan_count, last_seen_at)
-      VALUES ($1, $2, $3, NOW())
+      INSERT INTO station_heartbeat (station_name, last_clear_epoch, local_scan_count, tenant_id, last_seen_at)
+      VALUES ($1, $2, $3, $4, NOW())
       ON CONFLICT (station_name) DO UPDATE SET
         last_clear_epoch = $2,
         local_scan_count = $3,
+        tenant_id = COALESCE($4, station_heartbeat.tenant_id),
         last_seen_at = NOW()
-    `, [station_name, last_clear_epoch, local_scan_count]);
-    return { ok: true };
+    `, [station_name, last_clear_epoch, local_scan_count, tenantId]);
+
+    // Return license metadata for kiosk display
+    const response: any = { ok: true };
+    if (tenant && !tenant.isMasterKey) {
+      response.license = {
+        event_name: tenant.eventName,
+        max_stations: tenant.maxStations,
+        tenant_id: tenant.tenantId,
+      };
+    }
+    return response;
   } catch (e: any) {
     app.log.error({ err: e }, "Station heartbeat failed");
     reply.code(500);
@@ -1005,6 +1258,7 @@ app.get("/v1/scans/check-duplicate", async (req, reply) => {
   }
 
   const windowMin = Math.max(1, Math.min(60, parseInt(window_minutes || "5") || 5));
+  const ta = tenantAndClause(req, 4);
 
   const client = await pool.connect();
   try {
@@ -1014,9 +1268,10 @@ app.get("/v1/scans/check-duplicate", async (req, reply) => {
        WHERE badge_id = $1
          AND scanned_at >= NOW() - make_interval(mins => $2)
          AND ($3::text IS NULL OR station_name != $3)
+         ${ta.clause}
        ORDER BY scanned_at DESC
        LIMIT 1`,
-      [badge_id.trim(), windowMin, exclude_station?.trim() || null]
+      [badge_id.trim(), windowMin, exclude_station?.trim() || null, ...ta.params]
     );
 
     if (result.rows.length > 0) {

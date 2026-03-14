@@ -410,6 +410,9 @@ class Api(QObject):
 
     # Use QVariant so QWebChannel can deliver payloads to JS reliably
     connection_status_changed = pyqtSignal("QVariant")
+    # License status signals (thread-safe UI updates from heartbeat thread)
+    _license_warning = pyqtSignal(str)
+    _license_restored = pyqtSignal()
 
     def __init__(
         self,
@@ -453,6 +456,9 @@ class Api(QObject):
             "scan_feedback_ms": config.SCAN_FEEDBACK_DURATION_MS,
             "connection_check_s": config.CONNECTION_CHECK_INTERVAL_MS / 1000,
         }
+        # Connect license signals to UI update slots
+        self._license_warning.connect(self._show_license_warning_slot)
+        self._license_restored.connect(self._show_license_restored_slot)
         # Emit initial state so the UI can bind immediately
         QTimer.singleShot(0, lambda: self.connection_status_changed.emit(self._last_connection_result))
 
@@ -994,6 +1000,8 @@ class Api(QObject):
             "connection_check_s": config.CONNECTION_CHECK_INTERVAL_MS / 1000,
             "dashboard_url": dashboard_url,
             "monitoring_mode": config.CLOUD_READ_ONLY,
+            "license_read_only": getattr(config, '_license_read_only', False),
+            "license": getattr(config, '_license_info', None),
             "live_sync_enabled": config.LIVE_SYNC_ENABLED and not config.CLOUD_READ_ONLY,
             "live_sync_window_minutes": config.LIVE_SYNC_DUP_WINDOW_MINUTES,
             "log_level": config.LOGGING_LEVEL,
@@ -1559,40 +1567,43 @@ class Api(QObject):
         """Check clear_epoch and send heartbeat. Runs on MAIN thread (SQLite safe)."""
         if not self._sync_service:
             return
-        # Read-only mode: skip all outgoing operations and epoch sync
+        # Read-only mode: skip epoch sync but still send heartbeat
+        # (heartbeat needed so license status can be re-checked and restored)
         import config
-        if config.CLOUD_READ_ONLY:
+        license_read_only = getattr(config, '_license_read_only', False)
+        if config.CLOUD_READ_ONLY and not license_read_only:
             return
 
-        cloud_epoch = self._sync_service.last_clear_epoch
-        local_epoch = self._service._db.get_meta("last_clear_epoch")
+        # Epoch sync: only when not in read-only mode
+        if not config.CLOUD_READ_ONLY:
+            cloud_epoch = self._sync_service.last_clear_epoch
+            local_epoch = self._service._db.get_meta("last_clear_epoch")
 
-        # First time: initialize local epoch to cloud value (no clear needed)
-        if local_epoch is None and cloud_epoch:
-            self._service._db.set_meta("last_clear_epoch", cloud_epoch)
-            LOGGER.info("[Sync] First connection — initialized clear_epoch to %s", cloud_epoch)
-            local_epoch = cloud_epoch
-        # Existing station: detect remote clear
-        elif cloud_epoch and local_epoch and cloud_epoch != local_epoch:
-            LOGGER.info("[Sync] Remote clear detected (cloud=%s, local=%s) — exporting + clearing", cloud_epoch, local_epoch)
-            # Pause auto-sync to prevent re-uploading stale data
-            if self._auto_sync_manager:
-                self._auto_sync_manager.stop()
-                LOGGER.info("[Sync] Auto-sync paused during remote clear")
-            try:
-                self._service.export_scans()
-                LOGGER.info("[Sync] Backup exported before remote clear")
-            except Exception as e:
-                LOGGER.warning("[Sync] Backup export failed: %s", e)
-            self._service._db.clear_all_scans()
-            self._service._db.set_meta("last_clear_epoch", cloud_epoch)
-            LOGGER.info("[Sync] Local data cleared after remote clear")
-            # Refresh UI: reset counters and show alert modal
-            self._notify_remote_clear()
-            # Resume auto-sync
-            if self._auto_sync_manager:
-                self._auto_sync_manager.start()
-                LOGGER.info("[Sync] Auto-sync resumed after remote clear")
+            # First time: initialize local epoch to cloud value (no clear needed)
+            if local_epoch is None and cloud_epoch:
+                self._service._db.set_meta("last_clear_epoch", cloud_epoch)
+                LOGGER.info("[Sync] First connection — initialized clear_epoch to %s", cloud_epoch)
+            # Existing station: detect remote clear
+            elif cloud_epoch and local_epoch and cloud_epoch != local_epoch:
+                LOGGER.info("[Sync] Remote clear detected (cloud=%s, local=%s) — exporting + clearing", cloud_epoch, local_epoch)
+                # Pause auto-sync to prevent re-uploading stale data
+                if self._auto_sync_manager:
+                    self._auto_sync_manager.stop()
+                    LOGGER.info("[Sync] Auto-sync paused during remote clear")
+                try:
+                    self._service.export_scans()
+                    LOGGER.info("[Sync] Backup exported before remote clear")
+                except Exception as e:
+                    LOGGER.warning("[Sync] Backup export failed: %s", e)
+                self._service._db.clear_all_scans()
+                self._service._db.set_meta("last_clear_epoch", cloud_epoch)
+                LOGGER.info("[Sync] Local data cleared after remote clear")
+                # Refresh UI: reset counters and show alert modal
+                self._notify_remote_clear()
+                # Resume auto-sync
+                if self._auto_sync_manager:
+                    self._auto_sync_manager.start()
+                    LOGGER.info("[Sync] Auto-sync resumed after remote clear")
 
         # Send heartbeat (in background to avoid blocking main thread)
         station = self._service._db.get_station_name() or "Unknown"
@@ -1601,9 +1612,107 @@ class Api(QObject):
         sync_svc = self._sync_service
 
         def _send():
-            sync_svc.send_heartbeat(station, current_epoch, scan_count)
+            result = sync_svc.send_heartbeat(station, current_epoch, scan_count)
+            if result:
+                raw_license = result.get("license")
+                self._handle_license_status(
+                    status=result.get("status", "ok"),
+                    license_info=raw_license if isinstance(raw_license, dict) else {},
+                )
 
         threading.Thread(target=_send, daemon=True, name="heartbeat").start()
+
+    def _handle_license_status(self, status: str, license_info: dict) -> None:
+        """React to license status from heartbeat response.
+
+        Called from background thread — emits signals for UI updates
+        (thread-safe, auto-queued to main thread).
+
+        Args:
+            status: Top-level heartbeat status —
+                    ``"ok"`` | ``"license_expired"`` | ``"license_exceeded"``
+            license_info: License detail dict with keys:
+                    ``tier``, ``expires_at``, ``stations_used``, ``stations_max``
+        """
+        import config
+
+        tier = license_info.get("tier", "unknown")
+        expires_at = license_info.get("expires_at", "")
+        stations_used = license_info.get("stations_used")
+        stations_max = license_info.get("stations_max")
+
+        if status in ("license_expired", "license_exceeded"):
+            if not config.CLOUD_READ_ONLY:
+                config.CLOUD_READ_ONLY = True
+                if config.LIVE_SYNC_ENABLED:
+                    config.LIVE_SYNC_ENABLED = False
+                LOGGER.warning(
+                    "[License] %s — tier=%s, expires=%s, stations=%s/%s — entering read-only mode",
+                    status, tier, expires_at, stations_used, stations_max,
+                )
+            # Track that read-only was set by license (not manually by user)
+            config._license_read_only = True
+            # Build human-readable message for the UI
+            if status == "license_expired":
+                display_msg = f"License expired ({tier} tier, expired {expires_at}) — cloud sync disabled"
+            else:
+                display_msg = (
+                    f"Station limit exceeded ({stations_used}/{stations_max} "
+                    f"on {tier} tier) — cloud sync disabled"
+                )
+            self._license_warning.emit(display_msg)
+        elif status == "ok":
+            # Store latest license details for debug panel
+            config._license_info = license_info
+            if config.CLOUD_READ_ONLY and getattr(config, '_license_read_only', False):
+                config.CLOUD_READ_ONLY = False
+                config._license_read_only = False
+                LOGGER.info(
+                    "[License] Restored to ok — tier=%s, stations=%s/%s",
+                    tier, stations_used, stations_max,
+                )
+                self._license_restored.emit()
+
+    @pyqtSlot(str)
+    def _show_license_warning_slot(self, message: str) -> None:
+        """Show license warning in UI. Runs on MAIN thread."""
+        view = self._window.centralWidget() if self._window else None
+        if not view:
+            return
+        import json as _json
+        safe_msg = _json.dumps(message)
+        script = f"""
+        (function() {{
+            var el = document.getElementById('sync-status-message');
+            if (el) {{
+                el.textContent = {safe_msg};
+                el.style.color = '#FFA500';
+                el.style.display = 'block';
+            }}
+            console.log('[License] Warning shown: ' + {safe_msg});
+        }})();
+        """
+        view.page().runJavaScript(script)
+
+    @pyqtSlot()
+    def _show_license_restored_slot(self) -> None:
+        """Clear license warning in UI. Runs on MAIN thread."""
+        view = self._window.centralWidget() if self._window else None
+        if not view:
+            return
+        script = """
+        (function() {
+            var el = document.getElementById('sync-status-message');
+            if (el) {
+                el.textContent = 'License restored — cloud sync re-enabled';
+                el.style.color = 'var(--deloitte-green)';
+                el.style.display = 'block';
+                setTimeout(function() { el.style.display = 'none'; }, 5000);
+            }
+            console.log('[License] Restored to normal');
+        })();
+        """
+        view.page().runJavaScript(script)
 
     def _notify_remote_clear(self) -> None:
         """Show alert modal and refresh UI after remote clear detected."""
