@@ -103,6 +103,21 @@ Proves: 22 oracle tools are accessible
 - [ ] Plan social media launch posts (X, LinkedIn via gog)
 - [ ] Set up Telegram channel for product updates
 
+### Phase 5: MAW Orchestration Test (skills: agent-orchestrator, claude-team, maw fleet)
+- [ ] Use `/agent-orchestrator` to decompose the landing page mission into sub-tasks
+- [ ] Assign tasks to MAW agents via fleet: ta-api, ta-frontend, ta-landing
+- [ ] Wake agents with `maw wake` — watch them appear on fleet pitch (localhost:3456/#fleet)
+- [ ] Monitor real-time: idle → busy → Super Saiyan (2x size on pitch)
+- [ ] Each agent works in its own worktree — parallel, no conflicts
+- [ ] Example split:
+  - **ta-landing**: Research + rebuild landing page HTML/CSS
+  - **ta-frontend**: Update kiosk demo screenshots for landing page
+  - **ta-api**: Set up analytics endpoint for landing page tracking
+- [ ] Verify via fleet dashboard: all agents active, formation filled, recently active showing
+- [ ] Run `maw done` when tasks complete — agents return to idle
+
+**This proves**: MAW + new skills + proactive playbook = autonomous multi-agent team that researches, designs, builds, and ships — while you watch from the fleet dashboard.
+
 ### Success Criteria
 - Landing page looks competitive with Deputy/Jibble tier
 - Mobile score 90+ (Lighthouse)
