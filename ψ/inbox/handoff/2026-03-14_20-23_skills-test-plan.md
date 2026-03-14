@@ -125,6 +125,27 @@ Proves: 22 oracle tools are accessible
 - Clear pricing, CTA, and social proof
 - Design backed by research, not guesswork
 
+## Phase 6: Oracle Evolution (build, not install)
+
+### 6a. Compound Learning Hook
+After each `/rrr`, auto-scan the lesson learned and:
+- If it relates to a skill → patch that skill's SKILL.md with new pattern
+- If it's a workflow discovery → append to CLAUDE.md playbook
+- If it's a project insight → oracle_learn to shared knowledge base
+
+### 6b. Session Startup Intelligence
+At `/recap`, auto-query oracle_search for recent learnings relevant to current project.
+Inject 3-5 most relevant patterns into context so nothing is "forgotten."
+
+### 6c. Cross-Agent Knowledge Sync
+When MAW agents finish tasks, their learnings flow back:
+```
+agent completes → /rrr → oracle_learn → other agents can oracle_search
+```
+Shared brain, not siloed contexts.
+
+**These aren't skills to install — they're evolutions to build into oracle-skills-cli and the Oracle workflow.**
+
 ## API Keys Needed (for full skill activation)
 | Skill | Env Var | Where to get |
 |-------|---------|-------------|
