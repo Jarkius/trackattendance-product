@@ -1437,7 +1437,7 @@ class Api(QObject):
                 LOGGER.warning("[Admin] Failed to init sync service: %s", exc)
         elif self._sync_service:
             # Update existing sync service's API key
-            self._sync_service._api_key = key
+            self._sync_service.api_key = key
             LOGGER.info("[Admin] Sync service API key updated")
 
         LOGGER.info("[Admin] API key %s", "updated" if old_key else "set for first time")
@@ -1787,7 +1787,7 @@ class Api(QObject):
                 resp = requests.put(
                     f"{config.CLOUD_API_URL}/v1/stations/rename",
                     json={"old_name": old_name, "new_name": new_name},
-                    headers={"x-api-key": config.CLOUD_API_KEY},
+                    headers={"Authorization": f"Bearer {config.CLOUD_API_KEY}"},
                     timeout=10,
                 )
                 data = resp.json()
@@ -1865,6 +1865,46 @@ class Api(QObject):
             LOGGER.error("Failed to open export folder: %s", e)
 
 
+def _activate_macos_app() -> None:
+    """Ensure the Python process is a foreground GUI app on macOS.
+
+    When launched from certain terminals (e.g. WezTerm), the Python process
+    may inherit a background activation policy, causing windows to appear
+    behind the terminal.  This sets NSApplicationActivationPolicyRegular and
+    calls activateIgnoringOtherApps to bring the window to the front.
+    """
+    if sys.platform != "darwin":
+        return
+    try:
+        import ctypes
+        import ctypes.util
+
+        objc_lib = ctypes.cdll.LoadLibrary(ctypes.util.find_library("objc"))
+        objc_lib.objc_getClass.restype = ctypes.c_void_p
+        objc_lib.sel_registerName.restype = ctypes.c_void_p
+        objc_lib.objc_msgSend.restype = ctypes.c_void_p
+        objc_lib.objc_msgSend.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+
+        NSApp = objc_lib.objc_msgSend(
+            objc_lib.objc_getClass(b"NSApplication"),
+            objc_lib.sel_registerName(b"sharedApplication"),
+        )
+
+        # setActivationPolicy: 0 = NSApplicationActivationPolicyRegular
+        sel_policy = objc_lib.sel_registerName(b"setActivationPolicy:")
+        objc_lib.objc_msgSend.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_long]
+        objc_lib.objc_msgSend(NSApp, sel_policy, 0)
+
+        # activateIgnoringOtherApps:YES — bring window to front
+        sel_activate = objc_lib.sel_registerName(b"activateIgnoringOtherApps:")
+        objc_lib.objc_msgSend.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_bool]
+        objc_lib.objc_msgSend(NSApp, sel_activate, True)
+
+        LOGGER.debug("macOS activation policy set to Regular (foreground GUI)")
+    except Exception as exc:
+        LOGGER.debug("macOS activation policy setup skipped: %s", exc)
+
+
 def initialize_app(
     argv: Optional[Sequence[str]] = None,
     *,
@@ -1923,6 +1963,10 @@ def initialize_app(
                     window.show()
                 if enable_fade:
                     animation.start()
+                # Ensure window is raised above the launching terminal (WezTerm, etc.)
+                window.raise_()
+                window.activateWindow()
+                _activate_macos_app()
             if on_load_finished:
                 on_load_finished(ok)
             return
@@ -1936,6 +1980,9 @@ def initialize_app(
                 window.showFullScreen()
             else:
                 window.show()
+            window.raise_()
+            window.activateWindow()
+            _activate_macos_app()
         view.setHtml(FALLBACK_ERROR_HTML)
         if show_window:
             QMessageBox.critical(

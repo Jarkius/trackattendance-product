@@ -17,15 +17,30 @@ if (!process.env.API_KEY) {
 }
 
 // ---- request tenant context ----
-type TenantContext = {
+type LicenseTenant = {
   tenantId: string;
   licenseId: string;
   eventName: string;
   maxStations: number;
+  validUntil: string;
   isMasterKey: false;
-} | {
+};
+type MasterTenant = {
   isMasterKey: true;
 };
+type TenantContext = LicenseTenant | MasterTenant;
+
+/** Resolve tenant_id: license tenant → its UUID, master key → system sentinel */
+function resolveTenantId(tenant: TenantContext | null): string {
+  if (tenant && !tenant.isMasterKey) return tenant.tenantId;
+  return SYSTEM_TENANT_ID;
+}
+
+/** Narrow to LicenseTenant or null */
+function asLicenseTenant(tenant: TenantContext | null): LicenseTenant | null {
+  if (tenant && !tenant.isMasterKey) return tenant;
+  return null;
+}
 
 const app = Fastify({
   logger: true,
@@ -47,6 +62,8 @@ pool.on('error', (err) => {
 });
 
 const API_KEY = process.env.API_KEY || null;
+// Sentinel tenant for master-key / legacy data — composite PKs require NOT NULL tenant_id
+const SYSTEM_TENANT_ID = '00000000-0000-0000-0000-000000000000';
 const RATE_LIMIT_MAX = parseInt(process.env.RATE_LIMIT_MAX || "60", 10);
 const RATE_LIMIT_WINDOW = process.env.RATE_LIMIT_WINDOW || "1 minute";
 const PUBLIC_RATE_LIMIT_MAX = parseInt(process.env.PUBLIC_RATE_LIMIT_MAX || "30", 10);
@@ -180,14 +197,67 @@ try {
     await client.query(`CREATE INDEX IF NOT EXISTS idx_licenses_key ON licenses (license_key)`);
     await client.query(`ALTER TABLE licenses ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT now()`);
 
-    // Add tenant_id to existing tables (nullable for backward compat with existing data)
+    // Add tenant_id to existing tables (nullable initially for backward compat)
     await client.query(`ALTER TABLE scans ADD COLUMN IF NOT EXISTS tenant_id UUID REFERENCES tenants(id)`);
     await client.query(`ALTER TABLE roster_summary ADD COLUMN IF NOT EXISTS tenant_id UUID REFERENCES tenants(id)`);
     await client.query(`ALTER TABLE roster_meta ADD COLUMN IF NOT EXISTS tenant_id UUID REFERENCES tenants(id)`);
     await client.query(`ALTER TABLE station_heartbeat ADD COLUMN IF NOT EXISTS tenant_id UUID REFERENCES tenants(id)`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_scans_tenant ON scans (tenant_id)`);
 
-    app.log.info("Database migration check complete (including multi-tenant)");
+    // ---- Composite PK migration: tenant_id NOT NULL + composite keys ----
+    // 1. Ensure system default tenant exists
+    await client.query(`
+      INSERT INTO tenants (id, name, contact_email)
+      VALUES ('${SYSTEM_TENANT_ID}', 'System Default', NULL)
+      ON CONFLICT (id) DO NOTHING
+    `);
+    // 2. Backfill NULL tenant_ids with system tenant
+    await client.query(`UPDATE scans SET tenant_id = '${SYSTEM_TENANT_ID}' WHERE tenant_id IS NULL`);
+    await client.query(`UPDATE roster_summary SET tenant_id = '${SYSTEM_TENANT_ID}' WHERE tenant_id IS NULL`);
+    await client.query(`UPDATE roster_meta SET tenant_id = '${SYSTEM_TENANT_ID}' WHERE tenant_id IS NULL`);
+    await client.query(`UPDATE station_heartbeat SET tenant_id = '${SYSTEM_TENANT_ID}' WHERE tenant_id IS NULL`);
+    // 3. Set NOT NULL default
+    await client.query(`ALTER TABLE scans ALTER COLUMN tenant_id SET DEFAULT '${SYSTEM_TENANT_ID}'`);
+    await client.query(`ALTER TABLE scans ALTER COLUMN tenant_id SET NOT NULL`);
+    await client.query(`ALTER TABLE roster_summary ALTER COLUMN tenant_id SET DEFAULT '${SYSTEM_TENANT_ID}'`);
+    await client.query(`ALTER TABLE roster_summary ALTER COLUMN tenant_id SET NOT NULL`);
+    await client.query(`ALTER TABLE roster_meta ALTER COLUMN tenant_id SET DEFAULT '${SYSTEM_TENANT_ID}'`);
+    await client.query(`ALTER TABLE roster_meta ALTER COLUMN tenant_id SET NOT NULL`);
+    await client.query(`ALTER TABLE station_heartbeat ALTER COLUMN tenant_id SET DEFAULT '${SYSTEM_TENANT_ID}'`);
+    await client.query(`ALTER TABLE station_heartbeat ALTER COLUMN tenant_id SET NOT NULL`);
+    // 4. Migrate to composite PKs (idempotent: check if old PK exists before altering)
+    // station_heartbeat: (tenant_id, station_name)
+    await client.query(`
+      DO $$ BEGIN
+        IF EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'station_heartbeat_pkey'
+                   AND (SELECT array_length(conkey, 1) FROM pg_constraint WHERE conname = 'station_heartbeat_pkey') = 1) THEN
+          ALTER TABLE station_heartbeat DROP CONSTRAINT station_heartbeat_pkey;
+          ALTER TABLE station_heartbeat ADD PRIMARY KEY (tenant_id, station_name);
+        END IF;
+      END $$
+    `);
+    // roster_summary: (tenant_id, business_unit)
+    await client.query(`
+      DO $$ BEGIN
+        IF EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'roster_summary_pkey'
+                   AND (SELECT array_length(conkey, 1) FROM pg_constraint WHERE conname = 'roster_summary_pkey') = 1) THEN
+          ALTER TABLE roster_summary DROP CONSTRAINT roster_summary_pkey;
+          ALTER TABLE roster_summary ADD PRIMARY KEY (tenant_id, business_unit);
+        END IF;
+      END $$
+    `);
+    // roster_meta: (tenant_id, key)
+    await client.query(`
+      DO $$ BEGIN
+        IF EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'roster_meta_pkey'
+                   AND (SELECT array_length(conkey, 1) FROM pg_constraint WHERE conname = 'roster_meta_pkey') = 1) THEN
+          ALTER TABLE roster_meta DROP CONSTRAINT roster_meta_pkey;
+          ALTER TABLE roster_meta ADD PRIMARY KEY (tenant_id, key);
+        END IF;
+      END $$
+    `);
+
+    app.log.info("Database migration check complete (including multi-tenant + composite PKs)");
   } finally {
     client.release();
   }
@@ -249,7 +319,10 @@ app.get("/", { config: { rateLimit: false } }, async () => {
   try {
     const client = await pool.connect();
     try {
-      const result = await client.query("SELECT value FROM roster_meta WHERE key = 'clear_epoch'");
+      const result = await client.query(
+        "SELECT value FROM roster_meta WHERE tenant_id = $1 AND key = 'clear_epoch'",
+        [SYSTEM_TENANT_ID]
+      );
       clear_epoch = result.rows[0]?.value || null;
     } finally {
       client.release();
@@ -322,6 +395,7 @@ app.addHook("onRequest", async (req, reply) => {
       licenseId: lic.id,
       eventName: lic.event_name,
       maxStations: lic.max_stations,
+      validUntil: lic.valid_until,
       isMasterKey: false,
     } as TenantContext;
   } finally {
@@ -411,20 +485,27 @@ interface RosterSummaryRequest {
 
 // ---- roster summary endpoints ----
 
-// GET /v1/roster/hash — check if roster needs updating (authenticated)
+// GET /v1/roster/hash — check if roster needs updating (authenticated, tenant-scoped)
 app.get("/v1/roster/hash", async (req, reply) => {
+  const tenant = (req as any).tenant as TenantContext | null;
+  const tenantId = resolveTenantId(tenant);
   const client = await pool.connect();
   try {
-    const result = await client.query("SELECT value FROM roster_meta WHERE key = 'hash'");
+    const result = await client.query(
+      "SELECT value FROM roster_meta WHERE tenant_id = $1 AND key = 'hash'",
+      [tenantId]
+    );
     return { hash: result.rows[0]?.value || null };
   } finally {
     client.release();
   }
 });
 
-// POST /v1/roster/summary — full replace of BU counts (authenticated)
+// POST /v1/roster/summary — full replace of BU counts (authenticated, tenant-scoped)
 app.post<RosterSummaryRequest>("/v1/roster/summary", { schema: rosterSummarySchema }, async (req, reply) => {
   const { business_units } = req.body;
+  const tenant = (req as any).tenant as TenantContext | null;
+  const tenantId = resolveTenantId(tenant);
 
   // Compute hash from payload to enable dedup across stations
   const hashInput = business_units
@@ -436,29 +517,33 @@ app.post<RosterSummaryRequest>("/v1/roster/summary", { schema: rosterSummarySche
   const client = await pool.connect();
   try {
     // Check if hash matches — skip update if same roster already stored
-    const existing = await client.query("SELECT value FROM roster_meta WHERE key = 'hash'");
+    const existing = await client.query(
+      "SELECT value FROM roster_meta WHERE tenant_id = $1 AND key = 'hash'",
+      [tenantId]
+    );
     if (existing.rows[0]?.value === rosterHash) {
       return { saved: business_units.length, skipped: true, hash: rosterHash };
     }
 
     await client.query("BEGIN");
-    await client.query("DELETE FROM roster_summary");
+    await client.query("DELETE FROM roster_summary WHERE tenant_id = $1", [tenantId]);
 
     if (business_units.length > 0) {
       const names = business_units.map(bu => bu.name);
       const registered = business_units.map(bu => bu.registered);
+      const tenantIds = business_units.map(() => tenantId);
 
       await client.query(`
-        INSERT INTO roster_summary (business_unit, registered)
-        SELECT * FROM unnest($1::text[], $2::integer[])
-      `, [names, registered]);
+        INSERT INTO roster_summary (tenant_id, business_unit, registered)
+        SELECT * FROM unnest($1::uuid[], $2::text[], $3::integer[])
+      `, [tenantIds, names, registered]);
     }
 
-    // Store hash
+    // Store hash (composite PK: tenant_id + key)
     await client.query(`
-      INSERT INTO roster_meta (key, value) VALUES ('hash', $1)
-      ON CONFLICT (key) DO UPDATE SET value = $1
-    `, [rosterHash]);
+      INSERT INTO roster_meta (tenant_id, key, value) VALUES ($1, 'hash', $2)
+      ON CONFLICT (tenant_id, key) DO UPDATE SET value = $2
+    `, [tenantId, rosterHash]);
 
     await client.query("COMMIT");
 
@@ -493,9 +578,9 @@ app.post<BatchRequest>("/v1/scans/batch", { schema: batchSchema }, async (req, r
     }
   }
 
-  // Resolve tenant_id from auth context
+  // Resolve tenant_id from auth context (master key → system tenant sentinel)
   const tenant = (req as any).tenant as TenantContext | null;
-  const tenantId = (tenant && !tenant.isMasterKey) ? tenant.tenantId : null;
+  const tenantId = resolveTenantId(tenant);
 
   const client = await pool.connect();
   try {
@@ -508,7 +593,7 @@ app.post<BatchRequest>("/v1/scans/batch", { schema: batchSchema }, async (req, r
     const metas: any[] = [];
     const businessUnits: (string | null)[] = [];
     const scanSources: string[] = [];
-    const tenantIds: (string | null)[] = [];
+    const tenantIds: string[] = [];
 
     for (const ev of events) {
       keys.push(ev.idempotency_key);
@@ -628,6 +713,11 @@ app.get("/v1/dashboard/stats", async (req, reply) => {
       ORDER BY station_name ASC
     `, tf.params);
 
+    // Resolve tenant for roster_summary join filtering
+    const tenant = (req as any).tenant as TenantContext | null;
+    const rosterTenantId = resolveTenantId(tenant);
+    const rosterParam = tf.nextParam;
+
     const buResult = await client.query(`
       WITH scan_bu AS (
         SELECT COALESCE(business_unit, 'Unmatched') AS bu,
@@ -640,10 +730,10 @@ app.get("/v1/dashboard/stats", async (req, reply) => {
         COALESCE(r.registered, 0) AS registered,
         COALESCE(s.unique_badges, 0) AS unique_badges
       FROM scan_bu s
-      FULL OUTER JOIN roster_summary r ON s.bu = r.business_unit
+      FULL OUTER JOIN roster_summary r ON s.bu = r.business_unit AND r.tenant_id = $${rosterParam}
       ORDER BY CASE WHEN COALESCE(s.bu, r.business_unit, 'Unmatched') = 'Unmatched' THEN 1 ELSE 0 END,
                COALESCE(s.bu, r.business_unit, 'Unmatched') ASC
-    `, tf.params);
+    `, [...tf.params, rosterTenantId]);
 
     const summary = summaryResult.rows[0];
     const stations = stationsResult.rows.map(row => ({
@@ -788,7 +878,8 @@ app.get("/v1/dashboard/public/config", {
   const client = await pool.connect();
   try {
     const result = await client.query(
-      "SELECT value FROM roster_meta WHERE key = 'dashboard_refresh_interval'"
+      "SELECT value FROM roster_meta WHERE tenant_id = $1 AND key = 'dashboard_refresh_interval'",
+      [SYSTEM_TENANT_ID]
     );
     const interval = result.rows.length > 0 ? parseInt(result.rows[0].value) : 60;
     return { refresh_interval: interval };
@@ -808,9 +899,9 @@ app.put("/v1/dashboard/config", async (req, reply) => {
   const client = await pool.connect();
   try {
     await client.query(
-      `INSERT INTO roster_meta (key, value) VALUES ('dashboard_refresh_interval', $1)
-       ON CONFLICT (key) DO UPDATE SET value = $1`,
-      [String(interval)]
+      `INSERT INTO roster_meta (tenant_id, key, value) VALUES ($1, 'dashboard_refresh_interval', $2)
+       ON CONFLICT (tenant_id, key) DO UPDATE SET value = $2`,
+      [SYSTEM_TENANT_ID, String(interval)]
     );
     app.log.info({ refresh_interval: interval }, "Dashboard config updated");
     return { refresh_interval: interval };
@@ -910,9 +1001,9 @@ app.delete("/v1/admin/clear-scans", async (req, reply) => {
     await client.query("TRUNCATE TABLE roster_summary");
     const clearEpoch = new Date().toISOString();
     await client.query(`
-      INSERT INTO roster_meta (key, value) VALUES ('clear_epoch', $1)
-      ON CONFLICT (key) DO UPDATE SET value = $1
-    `, [clearEpoch]);
+      INSERT INTO roster_meta (tenant_id, key, value) VALUES ($1, 'clear_epoch', $2)
+      ON CONFLICT (tenant_id, key) DO UPDATE SET value = $2
+    `, [SYSTEM_TENANT_ID, clearEpoch]);
     // Reset roster hash so next import will re-upload
     await client.query("DELETE FROM roster_meta WHERE key = 'hash'");
     // Clear stale heartbeats — active stations will re-register on next health check
@@ -1094,12 +1185,15 @@ app.post("/v1/stations/heartbeat", async (req, reply) => {
   const local_scan_count = parseInt(body?.local_scan_count) || 0;
 
   const tenant = (req as any).tenant as TenantContext | null;
-  const tenantId = (tenant && !tenant.isMasterKey) ? tenant.tenantId : null;
+  const licTenant = asLicenseTenant(tenant);
+  const tenantId = resolveTenantId(tenant);
 
   const client = await pool.connect();
   try {
     // Enforce station limit for license-key authenticated requests
-    if (tenant && !tenant.isMasterKey) {
+    let stationsUsed = 0;
+    let stationsExceeded = false;
+    if (licTenant) {
       const existing = await client.query(
         `SELECT station_name FROM station_heartbeat
          WHERE tenant_id = $1 AND last_seen_at >= NOW() - INTERVAL '5 minutes'`,
@@ -1107,34 +1201,30 @@ app.post("/v1/stations/heartbeat", async (req, reply) => {
       );
       const activeStations = new Set(existing.rows.map(r => r.station_name));
       activeStations.add(station_name); // include current station
-      if (activeStations.size > tenant.maxStations) {
-        reply.code(403);
-        return {
-          ok: false,
-          error: "Station limit exceeded",
-          max_stations: tenant.maxStations,
-          active_stations: activeStations.size,
-        };
-      }
+      stationsUsed = activeStations.size;
+      stationsExceeded = stationsUsed > licTenant.maxStations;
     }
 
     await client.query(`
-      INSERT INTO station_heartbeat (station_name, last_clear_epoch, local_scan_count, tenant_id, last_seen_at)
+      INSERT INTO station_heartbeat (tenant_id, station_name, last_clear_epoch, local_scan_count, last_seen_at)
       VALUES ($1, $2, $3, $4, NOW())
-      ON CONFLICT (station_name) DO UPDATE SET
-        last_clear_epoch = $2,
-        local_scan_count = $3,
-        tenant_id = COALESCE($4, station_heartbeat.tenant_id),
+      ON CONFLICT (tenant_id, station_name) DO UPDATE SET
+        last_clear_epoch = $3,
+        local_scan_count = $4,
         last_seen_at = NOW()
-    `, [station_name, last_clear_epoch, local_scan_count, tenantId]);
+    `, [tenantId, station_name, last_clear_epoch, local_scan_count]);
 
-    // Return license metadata for kiosk display
-    const response: any = { ok: true };
-    if (tenant && !tenant.isMasterKey) {
+    // Return license metadata with fields the frontend expects
+    const response: any = { ok: true, status: "ok" };
+    if (licTenant) {
+      if (stationsExceeded) {
+        response.status = "license_exceeded";
+      }
       response.license = {
-        event_name: tenant.eventName,
-        max_stations: tenant.maxStations,
-        tenant_id: tenant.tenantId,
+        tier: licTenant.eventName,
+        expires_at: licTenant.validUntil,
+        stations_used: stationsUsed,
+        stations_max: licTenant.maxStations,
       };
     }
     return response;
@@ -1147,7 +1237,7 @@ app.post("/v1/stations/heartbeat", async (req, reply) => {
   }
 });
 
-// PUT /v1/stations/rename — rename a station across all scans and heartbeat
+// PUT /v1/stations/rename — rename a station across all scans and heartbeat (tenant-scoped)
 app.put("/v1/stations/rename", async (req, reply) => {
   const body = req.body as any;
   const old_name = typeof body?.old_name === "string" ? body.old_name.trim() : "";
@@ -1157,29 +1247,32 @@ app.put("/v1/stations/rename", async (req, reply) => {
     return { error: "old_name and new_name must be non-empty strings, max 128 characters" };
   }
 
+  const tenant = (req as any).tenant as TenantContext | null;
+  const tenantId = resolveTenantId(tenant);
+
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
     const scansResult = await client.query(
-      "UPDATE scans SET station_name = $1 WHERE station_name = $2",
-      [new_name, old_name]
+      "UPDATE scans SET station_name = $1 WHERE station_name = $2 AND tenant_id = $3",
+      [new_name, old_name, tenantId]
     );
     await client.query(
-      `INSERT INTO station_heartbeat (station_name, last_seen_at)
-       VALUES ($1, NOW())
-       ON CONFLICT (station_name) DO NOTHING`,
-      [new_name]
+      `INSERT INTO station_heartbeat (tenant_id, station_name, last_seen_at)
+       VALUES ($1, $2, NOW())
+       ON CONFLICT (tenant_id, station_name) DO NOTHING`,
+      [tenantId, new_name]
     );
     // Merge old heartbeat into new if old exists
     await client.query(
       `UPDATE station_heartbeat SET
-         local_scan_count = COALESCE((SELECT local_scan_count FROM station_heartbeat WHERE station_name = $2), 0),
-         last_clear_epoch = COALESCE((SELECT last_clear_epoch FROM station_heartbeat WHERE station_name = $2), last_clear_epoch),
+         local_scan_count = COALESCE((SELECT local_scan_count FROM station_heartbeat WHERE tenant_id = $3 AND station_name = $2), 0),
+         last_clear_epoch = COALESCE((SELECT last_clear_epoch FROM station_heartbeat WHERE tenant_id = $3 AND station_name = $2), last_clear_epoch),
          last_seen_at = NOW()
-       WHERE station_name = $1`,
-      [new_name, old_name]
+       WHERE tenant_id = $3 AND station_name = $1`,
+      [new_name, old_name, tenantId]
     );
-    await client.query("DELETE FROM station_heartbeat WHERE station_name = $1", [old_name]);
+    await client.query("DELETE FROM station_heartbeat WHERE tenant_id = $1 AND station_name = $2", [tenantId, old_name]);
     await client.query("COMMIT");
     app.log.info(`Station renamed: '${old_name}' → '${new_name}' (${scansResult.rowCount} scans updated)`);
     return { ok: true, scans_updated: scansResult.rowCount };
@@ -1199,7 +1292,10 @@ app.get("/v1/stations/status", {
 }, async (req, reply) => {
   const client = await pool.connect();
   try {
-    const epochResult = await client.query("SELECT value FROM roster_meta WHERE key = 'clear_epoch'");
+    const epochResult = await client.query(
+      "SELECT value FROM roster_meta WHERE tenant_id = $1 AND key = 'clear_epoch'",
+      [SYSTEM_TENANT_ID]
+    );
     const clear_epoch = epochResult.rows[0]?.value || null;
 
     const stationsResult = await client.query(`

@@ -23,3 +23,6 @@ numpy==2.4.2
 
 # Dev / testing
 pytest==9.0.2
+
+# Camera proximity detection
+mediapipe>=0.10.20

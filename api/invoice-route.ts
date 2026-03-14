@@ -21,12 +21,20 @@ import fs from 'fs';
 
 // --- Font Configuration ---
 // Prefer TH Sarabun New for proper Thai rendering; fall back to bundled Roboto
-const thFontPath = path.join(__dirname, 'fonts', 'THSarabunNew.ttf');
-const thFontBoldPath = path.join(__dirname, 'fonts', 'THSarabunNew-Bold.ttf');
+// Use process.cwd() so fonts/ resolves to project root in both dev (tsx) and production (node dist/)
+const thFontPath = path.join(process.cwd(), 'fonts', 'THSarabunNew.ttf');
+const thFontBoldPath = path.join(process.cwd(), 'fonts', 'THSarabunNew-Bold.ttf');
 const hasThaiFonts = fs.existsSync(thFontPath) && fs.existsSync(thFontBoldPath);
 
 // Resolve Roboto from pdfmake's own directory (works in both dev and dist/)
-const robotoDir = path.join(path.dirname(require.resolve('pdfmake')), 'fonts', 'Roboto');
+// Wrapped in try/catch so a missing pdfmake package doesn't crash the whole server
+let robotoDir: string;
+try {
+  robotoDir = path.join(path.dirname(require.resolve('pdfmake')), 'fonts', 'Roboto');
+} catch {
+  console.warn('⚠ pdfmake package not found — invoice PDF generation will be unavailable');
+  robotoDir = '';
+}
 
 const fonts = hasThaiFonts
   ? {
@@ -37,21 +45,23 @@ const fonts = hasThaiFonts
         bolditalics: thFontBoldPath,
       }
     }
-  : {
-      THSarabunNew: {
-        normal: path.join(robotoDir, 'Roboto-Regular.ttf'),
-        bold: path.join(robotoDir, 'Roboto-Medium.ttf'),
-        italics: path.join(robotoDir, 'Roboto-Italic.ttf'),
-        bolditalics: path.join(robotoDir, 'Roboto-MediumItalic.ttf'),
+  : robotoDir
+    ? {
+        THSarabunNew: {
+          normal: path.join(robotoDir, 'Roboto-Regular.ttf'),
+          bold: path.join(robotoDir, 'Roboto-Medium.ttf'),
+          italics: path.join(robotoDir, 'Roboto-Italic.ttf'),
+          bolditalics: path.join(robotoDir, 'Roboto-MediumItalic.ttf'),
+        }
       }
-    };
+    : {};
 
-if (!hasThaiFonts) {
+if (!hasThaiFonts && robotoDir) {
   console.warn('⚠ TH Sarabun New fonts not found — falling back to Roboto. Thai glyphs may not render. Place THSarabunNew.ttf + THSarabunNew-Bold.ttf in fonts/');
 }
 
 // @ts-ignore — pdfmake CJS default export is constructable at runtime
-const printer = new PdfPrinter(fonts);
+const printer = Object.keys(fonts).length > 0 ? new PdfPrinter(fonts) : null;
 
 // --- Request Interfaces ---
 interface InvoiceItem {
@@ -74,6 +84,12 @@ interface InvoiceRequest {
 
 export default async function invoiceRoute(app: FastifyInstance) {
   app.post<InvoiceRequest>('/v1/invoices/generate', async (request, reply) => {
+    // Guard: pdfmake must be available
+    if (!printer) {
+      reply.code(503);
+      return { error: 'Invoice generation unavailable — pdfmake package or fonts not configured' };
+    }
+
     // Master API key only — reject license-key auth
     const tenant = (request as any).tenant;
     if (!tenant || !tenant.isMasterKey) {
@@ -83,14 +99,19 @@ export default async function invoiceRoute(app: FastifyInstance) {
 
     const { invoice_no, client_name, client_address, client_tax_id, items, license_key, apply_vat } = request.body;
 
-    // Calculate Totals
-    const subtotal = items.reduce((sum, item) => sum + (item.qty * item.unit_price), 0);
-    const vat = apply_vat ? subtotal * 0.07 : 0;
-    const grandTotal = subtotal + vat;
+    if (!Array.isArray(items) || items.length === 0) {
+      reply.code(400);
+      return { error: 'items must be a non-empty array' };
+    }
+
+    // Calculate Totals — Math.round() to avoid floating-point rounding errors with THB
+    const subtotal = Math.round(items.reduce((sum, item) => sum + (item.qty * item.unit_price), 0) * 100) / 100;
+    const vat = Math.round((apply_vat ? subtotal * 0.07 : 0) * 100) / 100;
+    const grandTotal = Math.round((subtotal + vat) * 100) / 100;
 
     // WHT 3% is calculated on the Base Subtotal (Exclude VAT)
-    const wht3 = subtotal * 0.03;
-    const netTransfer = grandTotal - wht3;
+    const wht3 = Math.round(subtotal * 0.03 * 100) / 100;
+    const netTransfer = Math.round((grandTotal - wht3) * 100) / 100;
 
     // Generate PromptPay QR Base64
     const MY_TAX_ID = '0123456789123'; // TODO: Replace with actual tax ID
@@ -224,6 +245,7 @@ export default async function invoiceRoute(app: FastifyInstance) {
           const chunks: any[] = [];
           pdfDoc.on('data', (chunk: any) => chunks.push(chunk));
           pdfDoc.on('end', () => resolve(Buffer.concat(chunks)));
+          pdfDoc.on('error', (err: Error) => reject(err));
           pdfDoc.end();
         } catch (err) {
           reject(err);
@@ -234,7 +256,8 @@ export default async function invoiceRoute(app: FastifyInstance) {
     try {
       const pdfBuffer = await generatePdf();
       reply.header('Content-Type', 'application/pdf');
-      reply.header('Content-Disposition', `attachment; filename="invoice_${invoice_no}.pdf"`);
+      const safeInvoiceNo = invoice_no.replace(/[^a-zA-Z0-9\-_]/g, '');
+      reply.header('Content-Disposition', `attachment; filename="invoice_${safeInvoiceNo}.pdf"`);
       return reply.send(pdfBuffer);
     } catch (error) {
       app.log.error(error);

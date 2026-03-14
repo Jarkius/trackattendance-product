@@ -94,7 +94,8 @@ class TestConfigWithoutApiKey(unittest.TestCase):
         """Config module must load without CLOUD_API_KEY — free-tier mode."""
         env = os.environ.copy()
         env.pop("CLOUD_API_KEY", None)
-        with patch.dict(os.environ, env, clear=True):
+        with patch.dict(os.environ, env, clear=True), \
+             patch("dotenv.load_dotenv"):
             cfg = _reload_config()
             self.assertIsNone(cfg.CLOUD_API_KEY)
             self.assertFalse(cfg.CLOUD_READ_ONLY)
@@ -436,6 +437,15 @@ class TestSendHeartbeatReturnType(unittest.TestCase):
     def setUp(self):
         """Reset config state before each test."""
         _reload_config()
+        # Save real requests module so we can restore it after mocking
+        self._real_requests = sys.modules.get("requests")
+
+    def tearDown(self):
+        """Restore real requests module to avoid polluting other tests."""
+        if self._real_requests is not None:
+            sys.modules["requests"] = self._real_requests
+        import sync
+        importlib.reload(sync)
 
     def _make_sync(self):
         """Create a SyncService with a fresh mock for requests."""

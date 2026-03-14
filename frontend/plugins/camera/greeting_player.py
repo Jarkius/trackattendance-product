@@ -189,11 +189,11 @@ class GreetingPlayer(QObject):
         self._preloaded = False
         self._pending_file = None
 
-    @pyqtSlot("QMediaPlayer::Error", str)
+    @pyqtSlot(int, str)
     def _on_error(self, error, message):
         LOGGER.error("[Greeting] Playback error: %s — %s", error, message)
 
-    @pyqtSlot("QMediaPlayer::MediaStatus")
+    @pyqtSlot(int)
     def _on_media_status(self, status):
         from PyQt6.QtMultimedia import QMediaPlayer
         status_names = {

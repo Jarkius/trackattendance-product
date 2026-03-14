@@ -4,6 +4,12 @@
 -- Multi-tenant foundation (Sprint 1 Week 1)
 -- ============================================
 
+-- System default tenant for master-key / legacy data
+-- All tenant_id columns are NOT NULL; master-key operations use this sentinel.
+INSERT INTO tenants (id, name, contact_email)
+VALUES ('00000000-0000-0000-0000-000000000000', 'System Default', NULL)
+ON CONFLICT (id) DO NOTHING;
+
 -- Tenants: each agency/client is a tenant
 create table if not exists tenants (
   id            uuid        primary key default gen_random_uuid(),
@@ -42,7 +48,7 @@ create table if not exists scans (
   meta              jsonb,                           -- additional context (NO PII)
   business_unit     text,                            -- organizational unit (e.g. "Engineering")
   scan_source       text        not null default 'manual',  -- 'badge' or 'manual'
-  tenant_id         uuid        references tenants(id),     -- multi-tenant isolation
+  tenant_id         uuid        not null default '00000000-0000-0000-0000-000000000000' references tenants(id),
   created_at        timestamptz not null default now()
 );
 
@@ -55,28 +61,31 @@ create index if not exists idx_scans_badge_station_time   on scans (badge_id, st
 create index if not exists idx_scans_station_scanned_at   on scans (station_name, scanned_at desc);
 create index if not exists idx_scans_tenant               on scans (tenant_id);
 
--- roster summary: registered headcount per business unit (full-replace on each upload)
+-- roster summary: registered headcount per business unit per tenant (full-replace on each upload)
 create table if not exists roster_summary (
-  business_unit text        primary key,
+  tenant_id     uuid        not null default '00000000-0000-0000-0000-000000000000' references tenants(id),
+  business_unit text        not null,
   registered    integer     not null,
-  tenant_id     uuid        references tenants(id),
-  updated_at    timestamptz not null default now()
+  updated_at    timestamptz not null default now(),
+  primary key (tenant_id, business_unit)
 );
 
--- roster metadata (hash, clear_epoch, etc.)
+-- roster metadata (hash, clear_epoch, etc.) scoped per tenant
 create table if not exists roster_meta (
-  key       text primary key,
+  tenant_id uuid not null default '00000000-0000-0000-0000-000000000000' references tenants(id),
+  key       text not null,
   value     text not null,
-  tenant_id uuid references tenants(id)
+  primary key (tenant_id, key)
 );
 
--- station heartbeat: tracks station liveness and clear status
+-- station heartbeat: tracks station liveness and clear status per tenant
 create table if not exists station_heartbeat (
-  station_name      text        primary key,
+  tenant_id         uuid        not null default '00000000-0000-0000-0000-000000000000' references tenants(id),
+  station_name      text        not null,
   last_clear_epoch  text,
   local_scan_count  integer     not null default 0,
-  tenant_id         uuid        references tenants(id),
-  last_seen_at      timestamptz not null default now()
+  last_seen_at      timestamptz not null default now(),
+  primary key (tenant_id, station_name)
 );
 
 -- ============================================
@@ -92,14 +101,23 @@ alter table roster_meta enable row level security;
 alter table station_heartbeat enable row level security;
 
 -- Isolation policies using session variable set per-request
+-- WITH CHECK ensures INSERTs are also constrained to the current tenant
 create policy tenant_isolation_scans on scans
-  for all using (tenant_id = nullif(current_setting('app.current_tenant', true), '')::uuid);
+  for all
+  using (tenant_id = nullif(current_setting('app.current_tenant', true), '')::uuid)
+  with check (tenant_id = nullif(current_setting('app.current_tenant', true), '')::uuid);
 
 create policy tenant_isolation_roster_summary on roster_summary
-  for all using (tenant_id = nullif(current_setting('app.current_tenant', true), '')::uuid);
+  for all
+  using (tenant_id = nullif(current_setting('app.current_tenant', true), '')::uuid)
+  with check (tenant_id = nullif(current_setting('app.current_tenant', true), '')::uuid);
 
 create policy tenant_isolation_roster_meta on roster_meta
-  for all using (tenant_id = nullif(current_setting('app.current_tenant', true), '')::uuid);
+  for all
+  using (tenant_id = nullif(current_setting('app.current_tenant', true), '')::uuid)
+  with check (tenant_id = nullif(current_setting('app.current_tenant', true), '')::uuid);
 
 create policy tenant_isolation_station_heartbeat on station_heartbeat
-  for all using (tenant_id = nullif(current_setting('app.current_tenant', true), '')::uuid);
+  for all
+  using (tenant_id = nullif(current_setting('app.current_tenant', true), '')::uuid)
+  with check (tenant_id = nullif(current_setting('app.current_tenant', true), '')::uuid);
