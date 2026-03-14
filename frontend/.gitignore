@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+
+# Virtual Environment
+.venv/
+env/
+venv/
+
+# Archives / Legacy
+Backup/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+
+# Data
+data/*
+!data/.gitkeep
+
+# Logs (keep structure, ignore contents)
+logs/*.log
+logs/*.png
+logs/*.jpg
+!logs/.gitkeep
+
+# Build Artifacts
+build/
+dist/
+exports/
+*.spec
+!TrackAttendance.spec
+
+# Secrets & Environment
+.env
+.env.local
+.env*copy*
+*.key
+secrets/
+# Google Cloud service account keys
+@*.json
+*-key.json
+*-credentials.json
+
+# Tooling
+tools/
+
+# Camera plugin (keep greeting MP3s, ignore generated cache)
+plugins/camera/greetings/__pycache__/
+
+# macOS
+.DS_Store

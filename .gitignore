@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+
+# Build
+api/dist/
+frontend/build/
+frontend/dist/
+*.spec
+
+# Environment & secrets
+.env
+.env.local
+.env.production
+
+# Data (local only)
+frontend/data/
+frontend/exports/
+frontend/database.db
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Python
+*.egg-info/
+*.egg
+
+# Logs
+*.log
+
+# Large models
+*.task
+frontend/logs/
