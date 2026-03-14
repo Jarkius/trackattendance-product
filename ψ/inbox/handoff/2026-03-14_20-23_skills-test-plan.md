@@ -72,6 +72,44 @@ Proves: 22 oracle tools are accessible
 - `ψ/learn/sundial-org/awesome-openclaw-skills/` — Learn docs
 - `~/.claude/skills/gemini/SKILL.md` — Browser control reference
 
+## Primary Mission: Landing Page Enhancement
+
+**Goal**: Use the new skills to research, redesign, and elevate the TrackAttendance landing page (`landing/index.html`) to compete with top SaaS sales pages in the attendance/workforce management category.
+
+### Phase 1: Research (skills: deep-research, summarize, x-trends, verify-on-browser)
+- [ ] Deep research: top 10 attendance/workforce SaaS landing pages (Deputy, Jibble, Clockify, TimeClock365, BambooHR, Homebase, etc.)
+- [ ] Analyze their design patterns: hero sections, social proof, pricing layouts, CTAs, animations
+- [ ] Check current design trends for B2B SaaS sales pages (2025-2026 trends)
+- [ ] Summarize findings into actionable design brief
+- [ ] Check X trends for "attendance software", "HR tech", "workforce management" sentiment
+
+### Phase 2: Design System (skills: theme-gen, figma, animation-gen, frontend-design)
+- [ ] Generate professional color system from TrackAttendance brand
+- [ ] Define typography scale and spacing system
+- [ ] Create animation library (hero entrance, scroll reveals, hover states, micro-interactions)
+- [ ] Build component design tokens (buttons, cards, pricing tables, testimonials)
+
+### Phase 3: Rebuild Landing Page (skills: frontend-design, a11y-checker, clean-code)
+- [ ] Redesign hero section — compelling headline, demo video/screenshot, clear CTA
+- [ ] Add social proof section — testimonials, client logos, usage stats
+- [ ] Redesign pricing section — tier comparison, highlighted recommended plan
+- [ ] Add feature showcase with animations (scan demo, real-time dashboard, offline-first)
+- [ ] Mobile-first responsive design
+- [ ] Run a11y-checker on final output
+
+### Phase 4: Content & Distribution (skills: x-api, telegram-bot, gog, pptx-creator)
+- [ ] Create pitch deck from landing page content
+- [ ] Draft outreach email templates for B2B SEA prospects
+- [ ] Plan social media launch posts (X, LinkedIn via gog)
+- [ ] Set up Telegram channel for product updates
+
+### Success Criteria
+- Landing page looks competitive with Deputy/Jibble tier
+- Mobile score 90+ (Lighthouse)
+- Accessibility passes (a11y-checker clean)
+- Clear pricing, CTA, and social proof
+- Design backed by research, not guesswork
+
 ## API Keys Needed (for full skill activation)
 | Skill | Env Var | Where to get |
 |-------|---------|-------------|
