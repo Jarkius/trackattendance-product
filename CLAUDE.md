@@ -164,3 +164,60 @@ python scripts/debug_sync_performance.py
 - **API**: TypeScript, 2-space indent, camelCase values, PascalCase types, async/await
 - **Frontend Python**: PEP 8, 4-space indent, snake_case functions, PascalCase classes
 - **Frontend JS/CSS**: camelCase JS identifiers matching HTML element IDs, kebab-case CSS classes
+
+### Proactive Skills Playbook
+
+**Don't wait to be asked — reach for the right skill when the situation calls for it.**
+
+#### When Building UI/Frontend
+- `/figma` — Extract design tokens from Figma files before coding
+- `/theme-gen` — Generate color system from brand colors at project start
+- `/animation-gen` — Create animations from plain English descriptions
+- `/a11y-checker` — Run accessibility scan after any UI changes
+- `/frontend-design` — Apply design thinking principles
+
+#### When Deploying or Managing Infrastructure
+- `/cloudflare` — Manage DNS, purge cache, Workers routes
+- `/domain-dns-ops` — Domain management and DNS operations
+- `/r2-upload` — Upload files to R2/S3 with presigned URLs
+- `/verify-on-browser` — Verify deployment via CDP browser control
+- `/deployment-procedures` — Follow safe deployment patterns
+
+#### When Researching or Analyzing
+- `/deep-research` or `/gemini-deep-research` — Multi-step research tasks
+- `/summarize` — Summarize URLs, PDFs, audio, YouTube
+- `/context7` — Look up library docs before implementing
+- `/ga4-analytics` — Check traffic, SEO, user metrics
+- `/x-trends` — Check what's trending before content creation
+
+#### When Creating Content or Marketing
+- `/x-algorithm` — Check viral strategy before posting
+- `/x-api` — Post to X/Twitter
+- `/telegram-bot` + `/telegram-compose` — Send to Telegram
+- `/gog` — Gmail, Calendar, Drive, Sheets for outreach
+- `/imap-smtp-email` — Direct email send/receive
+- `/pptx-creator` — Generate pitch decks and presentations
+- `/veo` — Generate video content
+- `/gemini-image-simple` or `/openai-image-gen` — Generate images
+- `/edge-tts` — Text-to-speech with 50+ voices
+
+#### When Managing Agents or Complex Tasks
+- `/agent-orchestrator` — Decompose into sub-tasks, spawn agents
+- `/claude-team` — Multi-worker orchestration via worktrees
+- `/compound-engineering` — Nightly learning loop
+- `/self-improvement` — Capture errors and corrections
+- `/proactive-agent` — Anticipate needs, don't just follow
+
+#### When Starting/Ending Sessions
+- `/recap` — Orient at session start
+- `/standup` — Morning check
+- `/rrr` — Session retrospective
+- `/forward` — Handoff for next session
+
+#### Proactive Rules
+1. **Before writing UI** → check if there's a Figma file or brand colors to extract
+2. **Before deploying** → run a11y-checker on changed HTML
+3. **After errors** → log via self-improvement skill
+4. **Before content** → check x-trends for timing
+5. **After research** → summarize findings, don't just dump raw data
+6. **When context is low** → use /recap, not manual re-reading
