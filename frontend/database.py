@@ -49,6 +49,7 @@ class DatabaseManager:
         self._connection.execute("PRAGMA journal_mode=WAL")
         self._connection.row_factory = sqlite3.Row
         self._ensure_schema()
+        self.check_integrity()
 
     def _ensure_schema(self) -> None:
         with self._connection:
@@ -105,6 +106,14 @@ class DatabaseManager:
             pass  # column already exists
         try:
             self._connection.execute("ALTER TABLE scans ADD COLUMN scan_source TEXT DEFAULT 'manual'")
+        except sqlite3.OperationalError:
+            pass  # column already exists
+        try:
+            self._connection.execute("ALTER TABLE scans ADD COLUMN retry_count INTEGER DEFAULT 0")
+        except sqlite3.OperationalError:
+            pass  # column already exists
+        try:
+            self._connection.execute("ALTER TABLE scans ADD COLUMN last_retry_at TEXT")
         except sqlite3.OperationalError:
             pass  # column already exists
 
@@ -394,8 +403,12 @@ class DatabaseManager:
             return True, result["id"]
         return False, None
 
-    def fetch_pending_scans(self, limit: int = 100) -> List[ScanRecord]:
-        """Fetch scans that need to be synced to cloud."""
+    def fetch_pending_scans(self, limit: int = 100, max_retries: int = 10) -> List[ScanRecord]:
+        """Fetch scans that need to be synced to cloud.
+
+        Scans with retry_count > max_retries are skipped to avoid
+        wasting bandwidth on permanently failing records.
+        """
         cursor = self._connection.execute(
             """
             SELECT id, badge_id, scanned_at, station_name,
@@ -403,10 +416,11 @@ class DatabaseManager:
                    email, scan_source, sync_status, synced_at, sync_error
             FROM scans
             WHERE sync_status = 'pending'
+              AND COALESCE(retry_count, 0) <= ?
             ORDER BY scanned_at ASC
             LIMIT ?
             """,
-            (limit,),
+            (max_retries, limit),
         )
         return [
             ScanRecord(
@@ -573,6 +587,44 @@ class DatabaseManager:
         """Count total scan records in local database."""
         cursor = self._connection.execute("SELECT COUNT(*) AS cnt FROM scans")
         return int(cursor.fetchone()["cnt"] or 0)
+
+    def check_integrity(self) -> bool:
+        """Run SQLite integrity check on startup. Attempts WAL recovery on failure."""
+        try:
+            cursor = self._connection.execute("PRAGMA integrity_check")
+            result = cursor.fetchone()[0]
+            if result == "ok":
+                logger.info("Database integrity check passed")
+                return True
+            else:
+                logger.critical("Database integrity check FAILED: %s", result)
+                try:
+                    self._connection.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+                    logger.warning("WAL checkpoint (TRUNCATE) attempted for recovery")
+                except sqlite3.Error as wal_err:
+                    logger.error("WAL checkpoint recovery failed: %s", wal_err)
+                return False
+        except sqlite3.Error as e:
+            logger.critical("Database integrity check error: %s", e)
+            return False
+
+    def increment_retry_count(self, scan_ids: List[int]) -> int:
+        """Bump retry_count and set last_retry_at for failed scan IDs."""
+        if not scan_ids:
+            return 0
+        timestamp = datetime.now(timezone.utc).strftime(ISO_TIMESTAMP_FORMAT)
+        placeholders = ",".join("?" * len(scan_ids))
+        with self._connection:
+            cursor = self._connection.execute(
+                f"""
+                UPDATE scans
+                SET retry_count = COALESCE(retry_count, 0) + 1,
+                    last_retry_at = ?
+                WHERE id IN ({placeholders})
+                """,
+                [timestamp] + scan_ids,
+            )
+        return cursor.rowcount
 
     def close(self) -> None:
         self._connection.close()

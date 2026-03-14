@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import requests
@@ -354,8 +355,26 @@ class SyncService:
                     synced_count = result.get("saved", 0) + result.get("duplicates", 0)
                     scan_ids = [scan.id for scan in pending_scans]
 
-                    # Mark as synced
-                    self.db.mark_scans_as_synced(scan_ids)
+                    # Mark as synced — if this fails, scans were uploaded but
+                    # not marked locally. Log critically so the operator knows.
+                    # The idempotency keys prevent duplicate cloud records on
+                    # the next retry.
+                    try:
+                        self.db.mark_scans_as_synced(scan_ids)
+                    except Exception as db_err:
+                        LOGGER.critical(
+                            "UPLOAD SUCCEEDED but failed to mark %d scans as synced "
+                            "locally (IDs %s). They will be re-uploaded on next sync "
+                            "(idempotency keys prevent duplicates). DB error: %s",
+                            len(scan_ids), scan_ids[:10], db_err,
+                        )
+                        stats = self.db.get_sync_statistics()
+                        return {
+                            "synced": synced_count,
+                            "failed": 0,
+                            "pending": stats.get("pending", 0),
+                            "db_mark_error": str(db_err),
+                        }
 
                     LOGGER.info(
                         f"Successfully synced {synced_count} scans "
@@ -442,6 +461,8 @@ class SyncService:
                 }
 
         # All retries exhausted with no success - keep as pending for future retry
+        scan_ids = [scan.id for scan in pending_scans]
+        self.db.increment_retry_count(scan_ids)
         if last_error:
             error_msg = f"Network error (after {max_attempts} attempts): {last_error}"
             LOGGER.warning("%s — scans kept as pending for future retry", error_msg)
@@ -457,16 +478,12 @@ class SyncService:
         """
         Generate unique idempotency key for a scan.
 
-        Format: {station_name}-{badge_id}-{local_id}
-        Example: MainGate-101117-1234
+        Uses SHA256 of station_name (untrimmed) + badge_id + scanned_at
+        timestamp to avoid collisions across stations with similar names
+        or across reinstalls where local IDs reset.
         """
-        # Get station name dynamically from database (cached for performance)
-        if not hasattr(self, '_cached_station_name'):
-            self._cached_station_name = self.db.get_station_name() or "UnknownStation"
-        station = self._cached_station_name
-        # Sanitize station name (remove spaces and special chars)
-        safe_station = station.replace(" ", "").replace("-", "")
-        return f"{safe_station}-{scan.badge_id}-{scan.id}"
+        raw = f"{scan.station_name}|{scan.badge_id}|{scan.scanned_at}"
+        return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
     def check_duplicate_cloud(
@@ -697,7 +714,6 @@ def sync_roster_summary_from_data(bu_data: list, api_url: str, api_key: str) -> 
     if CLOUD_READ_ONLY:
         LOGGER.debug("Roster sync from data skipped (read-only mode)")
         return {"ok": True, "skipped": True}
-    import hashlib
 
     # Compute local hash (same algorithm as API)
     hash_input = "|".join(sorted(f"{row['bu_name']}:{row['count']}" for row in bu_data))
