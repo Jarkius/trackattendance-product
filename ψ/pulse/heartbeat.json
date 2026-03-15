@@ -1,0 +1,26 @@
+{
+  "timestamp": "2026-03-15T11:45:42.304Z",
+  "checks": [
+    {
+      "name": "Landing Page",
+      "ok": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "name": "Cloud API",
+      "ok": true,
+      "detail": "HTTP 404"
+    },
+    {
+      "name": "Telegram Bot",
+      "ok": true,
+      "detail": "jarkius_bot"
+    },
+    {
+      "name": "Git Status",
+      "ok": true,
+      "detail": "13 uncommitted changes"
+    }
+  ],
+  "healthy": true
+}
