@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "description": "TrackAttendance PULSE dispatch rules",
+  "rules": [
+    {
+      "id": "landing-down",
+      "trigger": { "event": "heartbeat:fail", "check": "Landing Page" },
+      "action": { "notify": true, "message": "🔴 Landing page is DOWN!" },
+      "cooldown_minutes": 30
+    },
+    {
+      "id": "deploy-success",
+      "trigger": { "event": "deploy:success" },
+      "action": { "notify": true, "message": "✅ Deployed to ${data.url}" },
+      "cooldown_minutes": 0
+    },
+    {
+      "id": "contrast-fix",
+      "trigger": { "event": "qa:contrast-fail" },
+      "action": { "notify": true, "message": "⚠️ Contrast issues found: ${data.count} failures" },
+      "cooldown_minutes": 60
+    }
+  ]
+}

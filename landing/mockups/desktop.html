@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1280, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Desktop Dashboard Mockup</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1280px;
+    height: 780px;
+    overflow: hidden;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: transparent;
+    padding: 20px;
+  }
+  .browser {
+    width: 1240px;
+    height: 740px;
+    background: #0f172a;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+  }
+  .browser-chrome {
+    height: 44px;
+    background: #1e293b;
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    gap: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    flex-shrink: 0;
+  }
+  .dots { display: flex; gap: 7px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-r { background: #ef4444; }
+  .dot-y { background: #eab308; }
+  .dot-g { background: #22c55e; }
+  .address-bar {
+    flex: 1;
+    max-width: 480px;
+    height: 28px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    margin-left: 16px;
+  }
+  .address-lock { color: #22c55e; font-size: 11px; margin-right: 6px; }
+  .address-text { color: #94a3b8; font-size: 12px; }
+  .app-body {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+  }
+  .sidebar {
+    width: 200px;
+    background: #1e293b;
+    border-right: 1px solid rgba(255,255,255,0.06);
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+  .sidebar-logo {
+    padding: 0 16px 16px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #f1f5f9;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    margin-bottom: 8px;
+  }
+  .sidebar-logo span { color: #8B5CF6; }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    font-size: 14px;
+    color: #64748b;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+  }
+  .nav-item.active {
+    color: #e2e8f0;
+    background: rgba(139,92,246,0.08);
+    border-left-color: #8B5CF6;
+  }
+  .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .main {
+    flex: 1;
+    padding: 28px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    overflow: hidden;
+  }
+  .main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .main-title { font-size: 22px; font-weight: 700; color: #f1f5f9; }
+  .main-date { font-size: 13px; color: #64748b; margin-left: 12px; }
+  .export-btn {
+    height: 36px;
+    padding: 0 16px;
+    background: rgba(139,92,246,0.12);
+    color: #c4b5fd;
+    border: 1px solid rgba(139,92,246,0.2);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .stat-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  .stat-card {
+    background: #1e293b;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+    padding: 18px 20px;
+  }
+  .stat-card-label { font-size: 12px; color: #64748b; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-card-value { font-size: 28px; font-weight: 700; color: #f1f5f9; }
+  .stat-card-sub { font-size: 12px; color: #22c55e; margin-top: 4px; }
+  .lower {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 20px;
+    flex: 1;
+    min-height: 0;
+  }
+  .chart-panel {
+    background: #1e293b;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+  }
+  .chart-title { font-size: 14px; font-weight: 600; color: #e2e8f0; margin-bottom: 16px; }
+  .chart {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    padding-bottom: 24px;
+    position: relative;
+  }
+  .chart-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .chart-bar {
+    width: 100%;
+    max-width: 40px;
+    background: #8B5CF6;
+    border-radius: 4px 4px 0 0;
+    min-height: 8px;
+  }
+  .chart-label { font-size: 11px; color: #64748b; }
+  .chart-val { font-size: 10px; color: #94a3b8; }
+  .stations-panel {
+    background: #1e293b;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+    padding: 20px;
+  }
+  .station-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .station-row:last-child { border-bottom: none; }
+  .station-name { font-size: 14px; color: #e2e8f0; font-weight: 500; }
+  .station-meta { font-size: 12px; color: #64748b; }
+  .station-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .station-status.online { color: #22c55e; }
+  .station-status.offline { color: #ef4444; }
+  .s-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+  .s-dot.online { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.5); }
+  .s-dot.offline { background: #ef4444; box-shadow: 0 0 6px rgba(239,68,68,0.5); }
+</style>
+</head>
+<body>
+<div class="browser">
+  <div class="browser-chrome">
+    <div class="dots">
+      <div class="dot dot-r"></div>
+      <div class="dot dot-y"></div>
+      <div class="dot dot-g"></div>
+    </div>
+    <div class="address-bar">
+      <span class="address-lock">&#x1F512;</span>
+      <span class="address-text">app.trackattendance.com/dashboard</span>
+    </div>
+  </div>
+  <div class="app-body">
+    <div class="sidebar">
+      <div class="sidebar-logo">Track<span>Attendance</span></div>
+      <div class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/></svg>
+        Stations
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+        Scans
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Export
+      </div>
+      <div class="nav-item" style="margin-top:auto;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.32 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </div>
+    </div>
+    <div class="main">
+      <div class="main-header">
+        <div>
+          <span class="main-title">Today's Attendance</span>
+          <span class="main-date">March 14, 2026</span>
+        </div>
+        <button class="export-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </button>
+      </div>
+      <div class="stat-cards">
+        <div class="stat-card">
+          <div class="stat-card-label">Total Scans</div>
+          <div class="stat-card-value">487</div>
+          <div class="stat-card-sub">+12% vs yesterday</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Unique Badges</div>
+          <div class="stat-card-value">412</div>
+          <div class="stat-card-sub">97% of roster</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Active Stations</div>
+          <div class="stat-card-value">3<span style="font-size:16px;color:#64748b;font-weight:400;">/4</span></div>
+          <div class="stat-card-sub">1 offline</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Sync Rate</div>
+          <div class="stat-card-value">100<span style="font-size:16px;color:#64748b;font-weight:400;">%</span></div>
+          <div class="stat-card-sub">All synced</div>
+        </div>
+      </div>
+      <div class="lower">
+        <div class="chart-panel">
+          <div class="chart-title">Scans by Hour</div>
+          <div class="chart">
+            <div class="chart-col"><div class="chart-val">23</div><div class="chart-bar" style="height:28px"></div><div class="chart-label">8</div></div>
+            <div class="chart-col"><div class="chart-val">67</div><div class="chart-bar" style="height:82px"></div><div class="chart-label">9</div></div>
+            <div class="chart-col"><div class="chart-val">45</div><div class="chart-bar" style="height:55px"></div><div class="chart-label">10</div></div>
+            <div class="chart-col"><div class="chart-val">31</div><div class="chart-bar" style="height:38px"></div><div class="chart-label">11</div></div>
+            <div class="chart-col"><div class="chart-val">58</div><div class="chart-bar" style="height:71px"></div><div class="chart-label">12</div></div>
+            <div class="chart-col"><div class="chart-val">72</div><div class="chart-bar" style="height:88px"></div><div class="chart-label">13</div></div>
+            <div class="chart-col"><div class="chart-val">49</div><div class="chart-bar" style="height:60px"></div><div class="chart-label">14</div></div>
+            <div class="chart-col"><div class="chart-val">83</div><div class="chart-bar" style="height:100px"></div><div class="chart-label">15</div></div>
+            <div class="chart-col"><div class="chart-val">38</div><div class="chart-bar" style="height:46px"></div><div class="chart-label">16</div></div>
+            <div class="chart-col"><div class="chart-val">21</div><div class="chart-bar" style="height:26px"></div><div class="chart-label">17</div></div>
+          </div>
+        </div>
+        <div class="stations-panel">
+          <div class="chart-title">Station Status</div>
+          <div class="station-row">
+            <div>
+              <div class="station-name">Gate A</div>
+              <div class="station-meta">142 scans today</div>
+            </div>
+            <div class="station-status online">
+              <div class="s-dot online"></div>
+              Online
+            </div>
+          </div>
+          <div class="station-row">
+            <div>
+              <div class="station-name">Gate B</div>
+              <div class="station-meta">198 scans today</div>
+            </div>
+            <div class="station-status online">
+              <div class="s-dot online"></div>
+              Online
+            </div>
+          </div>
+          <div class="station-row">
+            <div>
+              <div class="station-name">Gate C</div>
+              <div class="station-meta">147 scans today</div>
+            </div>
+            <div class="station-status online">
+              <div class="s-dot online"></div>
+              Online
+            </div>
+          </div>
+          <div class="station-row">
+            <div>
+              <div class="station-name">Gate D</div>
+              <div class="station-meta">0 scans today</div>
+            </div>
+            <div class="station-status offline">
+              <div class="s-dot offline"></div>
+              Offline
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

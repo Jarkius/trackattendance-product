@@ -128,10 +128,9 @@
 
     /* ── Glassmorphism: nav + highlighted cards (per visual-effects.md) ── */
     .glass-card {
-      background: rgba(241,245,249,0.8);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(0,0,0,0.06);
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
     }
     html.dark .glass-card {
       background: rgba(30,41,59,0.5);
@@ -282,13 +281,13 @@
         <span class="text-slate-900 dark:text-white font-bold text-xl tracking-tight">TrackAttendance</span>
       </a>
       <div class="hidden md:flex items-center gap-6 text-base">
-        <a href="#how-it-works" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors font-medium" data-th="วิธีใช้งาน" data-en="How It Works">วิธีใช้งาน</a>
-        <a href="#demo" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors font-medium" data-th="ทดลองใช้" data-en="Try Demo">ทดลองใช้</a>
-        <a href="#pricing" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors font-medium" data-th="ราคา" data-en="Pricing">ราคา</a>
-        <button id="lang-toggle" class="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors font-semibold border border-slate-200 dark:border-white/[0.06] rounded-lg px-3 py-1.5 text-sm">
+        <a href="#how-it-works" class="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors font-medium" data-th="วิธีใช้งาน" data-en="How It Works">วิธีใช้งาน</a>
+        <a href="#demo" class="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors font-medium" data-th="ทดลองใช้" data-en="Try Demo">ทดลองใช้</a>
+        <a href="#pricing" class="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors font-medium" data-th="ราคา" data-en="Pricing">ราคา</a>
+        <button id="lang-toggle" class="flex items-center gap-1.5 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors font-semibold border border-slate-200 dark:border-white/[0.06] rounded-lg px-3 py-1.5 text-sm">
           <span id="lang-label">EN</span>
         </button>
-        <button id="theme-toggle" class="theme-toggle text-slate-400 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors p-1.5" aria-label="Toggle theme">
+        <button id="theme-toggle" class="theme-toggle text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors p-1.5" aria-label="Toggle theme">
           <svg id="theme-sun" class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
           <svg id="theme-moon" class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
         </button>
@@ -323,23 +322,23 @@
             <span class="text-gradient" data-th="สแกนไวปานสายฟ้า เน็ตล่มงานก็ไม่สะดุด" data-en="Lightning-Fast Scanning — Zero Downtime">สแกนไวปานสายฟ้า เน็ตล่มงานก็ไม่สะดุด</span>
           </h1>
           <p class="text-xl md:text-2xl text-slate-600 dark:text-slate-300 mb-4 leading-relaxed font-semibold" data-th="จบปัญหาคิวล้นหน้าประตู" data-en="End long queues at the door">จบปัญหาคิวล้นหน้าประตู</p>
-          <p class="text-lg md:text-xl text-slate-500 dark:text-slate-400 mb-10 leading-relaxed" data-th="เปลี่ยนคอมพิวเตอร์หน้างานให้เป็นจุดสแกนเข้างานที่เร็วที่สุด<br>ซิงก์ข้อมูลหลายประตู ดูยอดคนเข้างานเรียลไทม์ ทำงานได้แม้ไม่มี WiFi" data-en="Turn any computer into the fastest event check-in station<br>Multi-gate sync, real-time dashboard — works without WiFi">เปลี่ยนคอมพิวเตอร์หน้างานให้เป็นจุดสแกนเข้างานที่เร็วที่สุด<br>ซิงก์ข้อมูลหลายประตู ดูยอดคนเข้างานเรียลไทม์ ทำงานได้แม้ไม่มี WiFi</p>
+          <p class="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-10 leading-relaxed" data-th="เปลี่ยนคอมพิวเตอร์หน้างานให้เป็นจุดสแกนเข้างานที่เร็วที่สุด<br>ซิงก์ข้อมูลหลายประตู ดูยอดคนเข้างานเรียลไทม์ ทำงานได้แม้ไม่มี WiFi" data-en="Turn any computer into the fastest event check-in station<br>Multi-gate sync, real-time dashboard — works without WiFi">เปลี่ยนคอมพิวเตอร์หน้างานให้เป็นจุดสแกนเข้างานที่เร็วที่สุด<br>ซิงก์ข้อมูลหลายประตู ดูยอดคนเข้างานเรียลไทม์ ทำงานได้แม้ไม่มี WiFi</p>
           <div class="flex flex-col sm:flex-row items-start gap-4 mb-10">
             <a href="#contact" class="w-full sm:w-auto btn-glow text-white h-12 px-8 rounded-full font-bold text-lg inline-flex items-center justify-center transition-colors" data-th="ทดลองใช้ระบบเช็คอิน (ฟรี)" data-en="Try Check-in System (Free)">ทดลองใช้ระบบเช็คอิน (ฟรี)</a>
-            <a href="#contact" class="w-full sm:w-auto border-2 border-slate-300 dark:border-white/15 hover:border-slate-400 dark:hover:border-white/30 text-slate-900 dark:text-white h-12 px-8 rounded-full font-bold text-lg inline-flex items-center justify-center transition-colors hover:bg-slate-100 dark:hover:bg-white/5" data-th="ขอใบเสนอราคา" data-en="Get a Quote">ขอใบเสนอราคา</a>
+            <a href="#contact" class="w-full sm:w-auto border-2 border-slate-300 dark:border-white/15 hover:border-slate-400 dark:hover:border-white/30 text-slate-900 dark:text-white h-12 px-8 rounded-full font-bold text-lg inline-flex items-center justify-center transition-colors hover:bg-slate-100 dark:hover:bg-slate-100 dark:bg-white/5" data-th="ขอใบเสนอราคา" data-en="Get a Quote">ขอใบเสนอราคา</a>
           </div>
           <div class="grid grid-cols-3 gap-6 max-w-sm">
             <div>
               <div class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">0.3s</div>
-              <div class="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium" data-th="ต่อการสแกน" data-en="Per scan">ต่อการสแกน</div>
+              <div class="text-sm text-slate-600 dark:text-slate-400 mt-1 font-medium" data-th="ต่อการสแกน" data-en="Per scan">ต่อการสแกน</div>
             </div>
             <div>
               <div class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">100%</div>
-              <div class="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium" data-th="ออฟไลน์ต่อเนื่อง" data-en="Offline uptime">ออฟไลน์ต่อเนื่อง</div>
+              <div class="text-sm text-slate-600 dark:text-slate-400 mt-1 font-medium" data-th="ออฟไลน์ต่อเนื่อง" data-en="Offline uptime">ออฟไลน์ต่อเนื่อง</div>
             </div>
             <div>
               <div class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">10+</div>
-              <div class="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium" data-th="ประตูพร้อมกัน" data-en="Concurrent gates">ประตูพร้อมกัน</div>
+              <div class="text-sm text-slate-600 dark:text-slate-400 mt-1 font-medium" data-th="ประตูพร้อมกัน" data-en="Concurrent gates">ประตูพร้อมกัน</div>
             </div>
           </div>
         </div>
@@ -351,7 +350,7 @@
               <div class="w-3 h-3 rounded-full bg-red-400"></div>
               <div class="w-3 h-3 rounded-full bg-amber-400"></div>
               <div class="w-3 h-3 rounded-full bg-green-400"></div>
-              <span class="ml-2 text-xs text-slate-400 dark:text-slate-500 font-medium">TrackAttendance Kiosk</span>
+              <span class="ml-2 text-xs text-slate-600 dark:text-slate-400 font-medium">TrackAttendance Kiosk</span>
             </div>
             <img src="screenshots/kiosk-ui.png" alt="TrackAttendance Kiosk Interface" class="w-full" loading="eager">
           </div>
@@ -365,10 +364,10 @@
     <div class="max-w-6xl mx-auto px-6">
       <div class="fade-section">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-          <div><div class="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-2 counter-animate" data-target="50" data-suffix="+">0</div><div class="text-slate-500 dark:text-slate-400 text-base" data-th="งานอีเวนต์ที่รองรับ" data-en="Events supported">งานอีเวนต์ที่รองรับ</div></div>
-          <div><div class="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-2 counter-animate" data-target="10" data-suffix="K+">0</div><div class="text-slate-500 dark:text-slate-400 text-base" data-th="ครั้งที่สแกนสำเร็จ" data-en="Successful scans">ครั้งที่สแกนสำเร็จ</div></div>
-          <div><div class="text-4xl md:text-5xl font-bold text-[#8B5CF6] mb-2 counter-animate" data-target="99.9" data-suffix="%">0</div><div class="text-slate-500 dark:text-slate-400 text-base" data-th="ระบบพร้อมใช้งาน" data-en="System uptime">ระบบพร้อมใช้งาน</div></div>
-          <div><div class="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-2 counter-animate" data-target="0.3" data-suffix="s">0</div><div class="text-slate-500 dark:text-slate-400 text-base" data-th="ความเร็วต่อการสแกน" data-en="Per scan speed">ความเร็วต่อการสแกน</div></div>
+          <div><div class="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-2 counter-animate" data-target="50" data-suffix="+">0</div><div class="text-slate-600 dark:text-slate-400 text-base" data-th="งานอีเวนต์ที่รองรับ" data-en="Events supported">งานอีเวนต์ที่รองรับ</div></div>
+          <div><div class="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-2 counter-animate" data-target="10" data-suffix="K+">0</div><div class="text-slate-600 dark:text-slate-400 text-base" data-th="ครั้งที่สแกนสำเร็จ" data-en="Successful scans">ครั้งที่สแกนสำเร็จ</div></div>
+          <div><div class="text-4xl md:text-5xl font-bold text-[#8B5CF6] mb-2 counter-animate" data-target="99.9" data-suffix="%">0</div><div class="text-slate-600 dark:text-slate-400 text-base" data-th="ระบบพร้อมใช้งาน" data-en="System uptime">ระบบพร้อมใช้งาน</div></div>
+          <div><div class="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-2 counter-animate" data-target="0.3" data-suffix="s">0</div><div class="text-slate-600 dark:text-slate-400 text-base" data-th="ความเร็วต่อการสแกน" data-en="Per scan speed">ความเร็วต่อการสแกน</div></div>
         </div>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-8 border-t border-slate-100 dark:border-white/[0.04]">
           <div class="flex flex-col items-center gap-2 p-4 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06]">
@@ -376,28 +375,28 @@
               <i data-lucide="shield-check" class="w-5 h-5 text-green-500"></i>
             </div>
             <span class="text-slate-700 dark:text-slate-300 text-sm font-semibold text-center">PDPA Compliant</span>
-            <span class="text-slate-400 dark:text-slate-500 text-xs text-center" data-th="ข้อมูลอยู่ในประเทศไทย" data-en="Data stays in Thailand">ข้อมูลอยู่ในประเทศไทย</span>
+            <span class="text-slate-600 dark:text-slate-400 text-xs text-center" data-th="ข้อมูลอยู่ในประเทศไทย" data-en="Data stays in Thailand">ข้อมูลอยู่ในประเทศไทย</span>
           </div>
           <div class="flex flex-col items-center gap-2 p-4 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06]">
             <div class="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
               <i data-lucide="cloud" class="w-5 h-5 text-blue-500"></i>
             </div>
             <span class="text-slate-700 dark:text-slate-300 text-sm font-semibold text-center">Google Cloud</span>
-            <span class="text-slate-400 dark:text-slate-500 text-xs text-center">asia-southeast1</span>
+            <span class="text-slate-600 dark:text-slate-400 text-xs text-center">asia-southeast1</span>
           </div>
           <div class="flex flex-col items-center gap-2 p-4 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06]">
             <div class="w-10 h-10 rounded-full bg-violet-500/10 flex items-center justify-center">
               <i data-lucide="lock" class="w-5 h-5 text-violet-500"></i>
             </div>
             <span class="text-slate-700 dark:text-slate-300 text-sm font-semibold text-center" data-th="SHA-256 เข้ารหัส" data-en="SHA-256 Encrypted">SHA-256 เข้ารหัส</span>
-            <span class="text-slate-400 dark:text-slate-500 text-xs text-center" data-th="ซิงก์ปลอดภัยทุกครั้ง" data-en="Every sync encrypted">ซิงก์ปลอดภัยทุกครั้ง</span>
+            <span class="text-slate-600 dark:text-slate-400 text-xs text-center" data-th="ซิงก์ปลอดภัยทุกครั้ง" data-en="Every sync encrypted">ซิงก์ปลอดภัยทุกครั้ง</span>
           </div>
           <div class="flex flex-col items-center gap-2 p-4 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06]">
             <div class="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
               <i data-lucide="wifi-off" class="w-5 h-5 text-emerald-500"></i>
             </div>
             <span class="text-slate-700 dark:text-slate-300 text-sm font-semibold text-center" data-th="100% ออฟไลน์" data-en="100% Offline Capable">100% ออฟไลน์</span>
-            <span class="text-slate-400 dark:text-slate-500 text-xs text-center" data-th="ทำงานได้แม้ไม่มีเน็ต" data-en="Works without internet">ทำงานได้แม้ไม่มีเน็ต</span>
+            <span class="text-slate-600 dark:text-slate-400 text-xs text-center" data-th="ทำงานได้แม้ไม่มีเน็ต" data-en="Works without internet">ทำงานได้แม้ไม่มีเน็ต</span>
           </div>
         </div>
       </div>
@@ -409,43 +408,43 @@
     <div class="max-w-6xl mx-auto px-6">
       <div class="fade-section">
         <div class="text-center mb-16">
-          <p class="text-[#8B5CF6] text-base font-semibold uppercase tracking-widest mb-4">Pain Points</p>
+          <p class="text-[#7c3aed] text-base font-semibold uppercase tracking-widest mb-4">Pain Points</p>
           <h2 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white" data-th="ปัญหาที่ทุกงานอีเวนต์เจอ" data-en="Problems Every Event Faces">ปัญหาที่ทุกงานอีเวนต์เจอ</h2>
         </div>
         <div class="grid md:grid-cols-2 gap-12 lg:gap-20 items-start">
           <div class="space-y-6">
-            <div class="flex gap-5 p-6 rounded-2xl bg-red-500/5 border border-red-500/15">
-              <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center">
-                <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+            <div class="flex gap-5 p-6 rounded-2xl bg-red-50 dark:bg-red-500/5 border border-red-200 dark:border-red-500/15">
+              <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-red-100 dark:bg-red-500/10 flex items-center justify-center">
+                <svg class="w-6 h-6 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
               </div>
               <div>
                 <h3 class="text-slate-900 dark:text-white font-bold text-lg md:text-xl mb-2" data-th="เน็ตล่มระหว่างงาน" data-en="WiFi Drops During Events">เน็ตล่มระหว่างงาน</h3>
-                <p class="text-slate-500 dark:text-slate-400 text-base md:text-lg leading-relaxed" data-th="สถานที่จัดงานมักมีสัญญาณไม่เสถียร ระบบออนไลน์ล่มตอนคนเยอะ ทำให้เช็คอินไม่ได้" data-en="Venues often have unstable connections — online systems crash during peak hours, blocking check-in">สถานที่จัดงานมักมีสัญญาณไม่เสถียร ระบบออนไลน์ล่มตอนคนเยอะ ทำให้เช็คอินไม่ได้</p>
+                <p class="text-slate-600 dark:text-slate-400 text-base md:text-lg leading-relaxed" data-th="สถานที่จัดงานมักมีสัญญาณไม่เสถียร ระบบออนไลน์ล่มตอนคนเยอะ ทำให้เช็คอินไม่ได้" data-en="Venues often have unstable connections — online systems crash during peak hours, blocking check-in">สถานที่จัดงานมักมีสัญญาณไม่เสถียร ระบบออนไลน์ล่มตอนคนเยอะ ทำให้เช็คอินไม่ได้</p>
               </div>
             </div>
-            <div class="flex gap-5 p-6 rounded-2xl bg-red-500/5 border border-red-500/15">
-              <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center">
-                <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <div class="flex gap-5 p-6 rounded-2xl bg-red-50 dark:bg-red-500/5 border border-red-200 dark:border-red-500/15">
+              <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-red-100 dark:bg-red-500/10 flex items-center justify-center">
+                <svg class="w-6 h-6 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
               </div>
               <div>
                 <h3 class="text-slate-900 dark:text-white font-bold text-lg md:text-xl mb-2" data-th="คิวยาว ลงทะเบียนช้า" data-en="Long Queues, Slow Registration">คิวยาว ลงทะเบียนช้า</h3>
-                <p class="text-slate-500 dark:text-slate-400 text-base md:text-lg leading-relaxed" data-th="ใช้กระดาษหรือ Google Forms เช็คอิน ทำให้คิวยาวเป็นชั่วโมง ผู้เข้าร่วมหงุดหงิด" data-en="Paper or Google Forms check-in creates hour-long queues, frustrating attendees">ใช้กระดาษหรือ Google Forms เช็คอิน ทำให้คิวยาวเป็นชั่วโมง ผู้เข้าร่วมหงุดหงิด</p>
+                <p class="text-slate-600 dark:text-slate-400 text-base md:text-lg leading-relaxed" data-th="ใช้กระดาษหรือ Google Forms เช็คอิน ทำให้คิวยาวเป็นชั่วโมง ผู้เข้าร่วมหงุดหงิด" data-en="Paper or Google Forms check-in creates hour-long queues, frustrating attendees">ใช้กระดาษหรือ Google Forms เช็คอิน ทำให้คิวยาวเป็นชั่วโมง ผู้เข้าร่วมหงุดหงิด</p>
               </div>
             </div>
-            <div class="flex gap-5 p-6 rounded-2xl bg-red-500/5 border border-red-500/15">
-              <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center">
-                <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <div class="flex gap-5 p-6 rounded-2xl bg-red-50 dark:bg-red-500/5 border border-red-200 dark:border-red-500/15">
+              <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-red-100 dark:bg-red-500/10 flex items-center justify-center">
+                <svg class="w-6 h-6 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
               </div>
               <div>
                 <h3 class="text-slate-900 dark:text-white font-bold text-lg md:text-xl mb-2" data-th="ข้อมูลกระจัดกระจาย" data-en="Scattered Data">ข้อมูลกระจัดกระจาย</h3>
-                <p class="text-slate-500 dark:text-slate-400 text-base md:text-lg leading-relaxed" data-th="หลายจุดเช็คอิน ข้อมูลอยู่คนละที่ ต้องมานั่งรวมไฟล์ Excel ทีหลัง เสี่ยงข้อมูลหาย" data-en="Multiple check-in stations, data in different places — manually merging Excel files later risks data loss">หลายจุดเช็คอิน ข้อมูลอยู่คนละที่ ต้องมานั่งรวมไฟล์ Excel ทีหลัง เสี่ยงข้อมูลหาย</p>
+                <p class="text-slate-600 dark:text-slate-400 text-base md:text-lg leading-relaxed" data-th="หลายจุดเช็คอิน ข้อมูลอยู่คนละที่ ต้องมานั่งรวมไฟล์ Excel ทีหลัง เสี่ยงข้อมูลหาย" data-en="Multiple check-in stations, data in different places — manually merging Excel files later risks data loss">หลายจุดเช็คอิน ข้อมูลอยู่คนละที่ ต้องมานั่งรวมไฟล์ Excel ทีหลัง เสี่ยงข้อมูลหาย</p>
               </div>
             </div>
           </div>
           <div class="glass-card rounded-2xl p-8 glow-card">
             <div class="flex items-center gap-3 mb-8">
-              <div class="w-12 h-12 rounded-xl bg-violet-500/15 flex items-center justify-center">
-                <svg class="w-6 h-6 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <div class="w-12 h-12 rounded-xl bg-violet-100 dark:bg-violet-500/15 flex items-center justify-center">
+                <svg class="w-6 h-6 text-violet-600 dark:text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
               </div>
               <h3 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white" data-th="TrackAttendance แก้ได้ทุกข้อ" data-en="TrackAttendance Solves All of These">TrackAttendance แก้ได้ทุกข้อ</h3>
             </div>
@@ -454,28 +453,28 @@
                 <svg class="w-6 h-6 text-[#8B5CF6] flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
                 <div>
                   <p class="text-slate-900 dark:text-white font-bold text-lg" data-th="Offline-First Architecture" data-en="Offline-First Architecture">Offline-First Architecture</p>
-                  <p class="text-slate-500 dark:text-slate-400 text-base md:text-lg leading-relaxed" data-th="ข้อมูลบันทึกลงเครื่องทันที สแกนได้แม้ไม่มีเน็ต ซิงค์อัตโนมัติเมื่อออนไลน์" data-en="Data saves locally instantly — scan without internet, auto-sync when online">ข้อมูลบันทึกลงเครื่องทันที สแกนได้แม้ไม่มีเน็ต ซิงค์อัตโนมัติเมื่อออนไลน์</p>
+                  <p class="text-slate-600 dark:text-slate-400 text-base md:text-lg leading-relaxed" data-th="ข้อมูลบันทึกลงเครื่องทันที สแกนได้แม้ไม่มีเน็ต ซิงค์อัตโนมัติเมื่อออนไลน์" data-en="Data saves locally instantly — scan without internet, auto-sync when online">ข้อมูลบันทึกลงเครื่องทันที สแกนได้แม้ไม่มีเน็ต ซิงค์อัตโนมัติเมื่อออนไลน์</p>
                 </div>
               </div>
               <div class="flex gap-4">
                 <svg class="w-6 h-6 text-[#8B5CF6] flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
                 <div>
                   <p class="text-slate-900 dark:text-white font-bold text-lg" data-th="สแกนเร็วไม่ถึง 1 วินาที" data-en="Sub-Second Scanning">สแกนเร็วไม่ถึง 1 วินาที</p>
-                  <p class="text-slate-500 dark:text-slate-400 text-base md:text-lg leading-relaxed" data-th="ใช้เครื่องยิงบาร์โค้ดหรือกล้องสแกน QR ลดคิวให้เหลือไม่กี่วินาทีต่อคน" data-en="Use a barcode scanner or QR camera — queue drops to seconds per person">ใช้เครื่องยิงบาร์โค้ดหรือกล้องสแกน QR ลดคิวให้เหลือไม่กี่วินาทีต่อคน</p>
+                  <p class="text-slate-600 dark:text-slate-400 text-base md:text-lg leading-relaxed" data-th="ใช้เครื่องยิงบาร์โค้ดหรือกล้องสแกน QR ลดคิวให้เหลือไม่กี่วินาทีต่อคน" data-en="Use a barcode scanner or QR camera — queue drops to seconds per person">ใช้เครื่องยิงบาร์โค้ดหรือกล้องสแกน QR ลดคิวให้เหลือไม่กี่วินาทีต่อคน</p>
                 </div>
               </div>
               <div class="flex gap-4">
                 <svg class="w-6 h-6 text-[#8B5CF6] flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
                 <div>
                   <p class="text-slate-900 dark:text-white font-bold text-lg" data-th="Dashboard เรียลไทม์" data-en="Real-time Dashboard">Dashboard เรียลไทม์</p>
-                  <p class="text-slate-500 dark:text-slate-400 text-base md:text-lg leading-relaxed" data-th="ดูสถิติรวมจากทุกจุดเช็คอินแบบ Real-time บน Dashboard กลาง" data-en="View aggregated stats from all check-in stations in real-time on a central dashboard">ดูสถิติรวมจากทุกจุดเช็คอินแบบ Real-time บน Dashboard กลาง</p>
+                  <p class="text-slate-600 dark:text-slate-400 text-base md:text-lg leading-relaxed" data-th="ดูสถิติรวมจากทุกจุดเช็คอินแบบ Real-time บน Dashboard กลาง" data-en="View aggregated stats from all check-in stations in real-time on a central dashboard">ดูสถิติรวมจากทุกจุดเช็คอินแบบ Real-time บน Dashboard กลาง</p>
                 </div>
               </div>
               <div class="flex gap-4">
                 <svg class="w-6 h-6 text-[#8B5CF6] flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
                 <div>
                   <p class="text-slate-900 dark:text-white font-bold text-lg" data-th="ข้อมูลรวมศูนย์ ส่งออก Excel ได้" data-en="Centralized Data, Excel Export">ข้อมูลรวมศูนย์ ส่งออก Excel ได้</p>
-                  <p class="text-slate-500 dark:text-slate-400 text-base md:text-lg leading-relaxed" data-th="ทุกสถานีซิงค์ข้อมูลเข้าคลาวด์ ดึงรายงานรวมได้ทันทีหลังจบงาน" data-en="All stations sync to cloud — pull combined reports instantly after the event">ทุกสถานีซิงค์ข้อมูลเข้าคลาวด์ ดึงรายงานรวมได้ทันทีหลังจบงาน</p>
+                  <p class="text-slate-600 dark:text-slate-400 text-base md:text-lg leading-relaxed" data-th="ทุกสถานีซิงค์ข้อมูลเข้าคลาวด์ ดึงรายงานรวมได้ทันทีหลังจบงาน" data-en="All stations sync to cloud — pull combined reports instantly after the event">ทุกสถานีซิงค์ข้อมูลเข้าคลาวด์ ดึงรายงานรวมได้ทันทีหลังจบงาน</p>
                 </div>
               </div>
             </div>
@@ -490,9 +489,9 @@
     <div class="max-w-6xl mx-auto px-6">
       <div class="fade-section">
         <div class="text-center mb-16">
-          <p class="text-[#8B5CF6] text-base font-semibold uppercase tracking-widest mb-4">How It Works</p>
+          <p class="text-[#7c3aed] text-base font-semibold uppercase tracking-widest mb-4">How It Works</p>
           <h2 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white" data-th="ใช้งานง่าย 3 ขั้นตอน" data-en="Simple 3-Step Setup">ใช้งานง่าย 3 ขั้นตอน</h2>
-          <p class="text-slate-500 dark:text-slate-400 text-lg md:text-xl mt-4 max-w-lg mx-auto" data-th="ตั้งค่าครั้งเดียว ใช้ได้เลยวันจริง ไม่ต้องมีความรู้ IT" data-en="Set up once, use on event day — no IT expertise needed">ตั้งค่าครั้งเดียว ใช้ได้เลยวันจริง ไม่ต้องมีความรู้ IT</p>
+          <p class="text-slate-600 dark:text-slate-400 text-lg md:text-xl mt-4 max-w-lg mx-auto" data-th="ตั้งค่าครั้งเดียว ใช้ได้เลยวันจริง ไม่ต้องมีความรู้ IT" data-en="Set up once, use on event day — no IT expertise needed">ตั้งค่าครั้งเดียว ใช้ได้เลยวันจริง ไม่ต้องมีความรู้ IT</p>
         </div>
         <div class="grid md:grid-cols-3 gap-8 relative">
           <div class="hidden md:block absolute top-20 left-[calc(16.67%+2rem)] right-[calc(16.67%+2rem)] h-0.5 bg-gradient-to-r from-violet-500/50 via-[#8B5CF6]/30 to-violet-500/50"></div>
@@ -501,8 +500,8 @@
               <span class="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-[#8B5CF6] font-bold text-3xl">1</span>
             </div>
             <h3 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-4" data-th="นำเข้ารายชื่อ" data-en="Import Roster">นำเข้ารายชื่อ</h3>
-            <p class="text-slate-500 dark:text-slate-400 text-base md:text-lg leading-relaxed" data-th="อัปโหลดไฟล์ Excel รายชื่อผู้เข้าร่วม<br>ระบบจะจับคู่กับ Badge ID ให้อัตโนมัติ<br>รองรับหลายหน่วยงาน/แผนก" data-en="Upload attendee Excel roster<br>System auto-matches with Badge IDs<br>Supports multiple departments">อัปโหลดไฟล์ Excel รายชื่อผู้เข้าร่วม<br>ระบบจะจับคู่กับ Badge ID ให้อัตโนมัติ<br>รองรับหลายหน่วยงาน/แผนก</p>
-            <div class="mt-6 inline-flex items-center gap-2 bg-slate-50 dark:bg-navy-900 border border-slate-200 dark:border-white/[0.06] rounded-xl px-4 py-2 text-base text-slate-500 dark:text-slate-400">
+            <p class="text-slate-600 dark:text-slate-400 text-base md:text-lg leading-relaxed" data-th="อัปโหลดไฟล์ Excel รายชื่อผู้เข้าร่วม<br>ระบบจะจับคู่กับ Badge ID ให้อัตโนมัติ<br>รองรับหลายหน่วยงาน/แผนก" data-en="Upload attendee Excel roster<br>System auto-matches with Badge IDs<br>Supports multiple departments">อัปโหลดไฟล์ Excel รายชื่อผู้เข้าร่วม<br>ระบบจะจับคู่กับ Badge ID ให้อัตโนมัติ<br>รองรับหลายหน่วยงาน/แผนก</p>
+            <div class="mt-6 inline-flex items-center gap-2 bg-slate-50 dark:bg-navy-900 border border-slate-200 dark:border-white/[0.06] rounded-xl px-4 py-2 text-base text-slate-600 dark:text-slate-400">
               <svg class="w-5 h-5 text-[#8B5CF6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
               .xlsx, .xls
             </div>
@@ -512,8 +511,8 @@
               <span class="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-[#8B5CF6] font-bold text-3xl">2</span>
             </div>
             <h3 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-4" data-th="สแกนเข้างาน" data-en="Scan to Check In">สแกนเข้างาน</h3>
-            <p class="text-slate-500 dark:text-slate-400 text-base md:text-lg leading-relaxed" data-th="ยิงบาร์โค้ดหรือสแกน QR Code<br>บันทึกลงเครื่องทันที ไม่ต้องรอเน็ต<br>ตรวจจับคนสแกนซ้ำอัตโนมัติ" data-en="Scan barcode or QR code<br>Saves locally instantly — no internet needed<br>Auto-detects duplicate scans">ยิงบาร์โค้ดหรือสแกน QR Code<br>บันทึกลงเครื่องทันที ไม่ต้องรอเน็ต<br>ตรวจจับคนสแกนซ้ำอัตโนมัติ</p>
-            <div class="mt-6 inline-flex items-center gap-2 bg-slate-50 dark:bg-navy-900 border border-slate-200 dark:border-white/[0.06] rounded-xl px-4 py-2 text-base text-slate-500 dark:text-slate-400">
+            <p class="text-slate-600 dark:text-slate-400 text-base md:text-lg leading-relaxed" data-th="ยิงบาร์โค้ดหรือสแกน QR Code<br>บันทึกลงเครื่องทันที ไม่ต้องรอเน็ต<br>ตรวจจับคนสแกนซ้ำอัตโนมัติ" data-en="Scan barcode or QR code<br>Saves locally instantly — no internet needed<br>Auto-detects duplicate scans">ยิงบาร์โค้ดหรือสแกน QR Code<br>บันทึกลงเครื่องทันที ไม่ต้องรอเน็ต<br>ตรวจจับคนสแกนซ้ำอัตโนมัติ</p>
+            <div class="mt-6 inline-flex items-center gap-2 bg-slate-50 dark:bg-navy-900 border border-slate-200 dark:border-white/[0.06] rounded-xl px-4 py-2 text-base text-slate-600 dark:text-slate-400">
               <svg class="w-5 h-5 text-[#8B5CF6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
               QR / Barcode
             </div>
@@ -523,8 +522,8 @@
               <span class="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-[#8B5CF6] font-bold text-3xl">3</span>
             </div>
             <h3 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-4" data-th="ดูผลแบบเรียลไทม์" data-en="View Results in Real-time">ดูผลแบบเรียลไทม์</h3>
-            <p class="text-slate-500 dark:text-slate-400 text-base md:text-lg leading-relaxed" data-th="Dashboard แสดงสถิติจากทุกจุดสแกน<br>ซิงค์ข้อมูลขึ้นคลาวด์อัตโนมัติ<br>ส่งออก Excel ได้ทันทีหลังจบงาน" data-en="Dashboard shows stats from all scan stations<br>Auto-sync data to cloud<br>Export Excel instantly after event">Dashboard แสดงสถิติจากทุกจุดสแกน<br>ซิงค์ข้อมูลขึ้นคลาวด์อัตโนมัติ<br>ส่งออก Excel ได้ทันทีหลังจบงาน</p>
-            <div class="mt-6 inline-flex items-center gap-2 bg-slate-50 dark:bg-navy-900 border border-slate-200 dark:border-white/[0.06] rounded-xl px-4 py-2 text-base text-slate-500 dark:text-slate-400">
+            <p class="text-slate-600 dark:text-slate-400 text-base md:text-lg leading-relaxed" data-th="Dashboard แสดงสถิติจากทุกจุดสแกน<br>ซิงค์ข้อมูลขึ้นคลาวด์อัตโนมัติ<br>ส่งออก Excel ได้ทันทีหลังจบงาน" data-en="Dashboard shows stats from all scan stations<br>Auto-sync data to cloud<br>Export Excel instantly after event">Dashboard แสดงสถิติจากทุกจุดสแกน<br>ซิงค์ข้อมูลขึ้นคลาวด์อัตโนมัติ<br>ส่งออก Excel ได้ทันทีหลังจบงาน</p>
+            <div class="mt-6 inline-flex items-center gap-2 bg-slate-50 dark:bg-navy-900 border border-slate-200 dark:border-white/[0.06] rounded-xl px-4 py-2 text-base text-slate-600 dark:text-slate-400">
               <svg class="w-5 h-5 text-[#8B5CF6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
               Real-time Dashboard
             </div>
@@ -539,7 +538,7 @@
     <div class="max-w-6xl mx-auto px-6">
       <div class="fade-section">
         <div class="text-center mb-16">
-          <p class="text-[#8B5CF6] text-base font-semibold uppercase tracking-widest mb-4">Features</p>
+          <p class="text-[#7c3aed] text-base font-semibold uppercase tracking-widest mb-4">Features</p>
           <h2 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white" data-th="ครบทุกอย่างที่ต้องการ" data-en="Everything You Need">ครบทุกอย่างที่ต้องการ</h2>
         </div>
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -549,7 +548,7 @@
               <svg class="w-7 h-7 text-[#8B5CF6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
             </div>
             <h3 class="text-slate-900 dark:text-white font-bold text-xl mb-3" data-th="สแกนได้ทุกรูปแบบ" data-en="Multi-Format Scanning">สแกนได้ทุกรูปแบบ</h3>
-            <p class="text-slate-500 dark:text-slate-400 text-base md:text-lg leading-relaxed" data-th="รองรับ QR Code, Barcode 1D/2D, RFID/NFC และพิมพ์รหัสด้วยคีย์บอร์ด — สแกนไม่ถึง 0.3 วินาทีต่อคน" data-en="QR Code, Barcode 1D/2D, RFID/NFC, and manual keyboard entry — under 0.3 seconds per scan">รองรับ QR Code, Barcode 1D/2D, RFID/NFC และพิมพ์รหัสด้วยคีย์บอร์ด — สแกนไม่ถึง 0.3 วินาทีต่อคน</p>
+            <p class="text-slate-600 dark:text-slate-400 text-base md:text-lg leading-relaxed" data-th="รองรับ QR Code, Barcode 1D/2D, RFID/NFC และพิมพ์รหัสด้วยคีย์บอร์ด — สแกนไม่ถึง 0.3 วินาทีต่อคน" data-en="QR Code, Barcode 1D/2D, RFID/NFC, and manual keyboard entry — under 0.3 seconds per scan">รองรับ QR Code, Barcode 1D/2D, RFID/NFC และพิมพ์รหัสด้วยคีย์บอร์ด — สแกนไม่ถึง 0.3 วินาทีต่อคน</p>
           </div>
           <!-- 2. Voice Greeting System -->
           <div class="bg-white dark:bg-navy-950 rounded-2xl p-8 border border-slate-200 dark:border-white/[0.06] hover:border-violet-500/30 card-hover fade-section stagger-2">
@@ -557,7 +556,7 @@
               <svg class="w-7 h-7 text-[#8B5CF6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
             </div>
             <h3 class="text-slate-900 dark:text-white font-bold text-xl mb-3" data-th="ระบบเสียงทักทายอัตโนมัติ" data-en="Voice Greeting System">ระบบเสียงทักทายอัตโนมัติ</h3>
-            <p class="text-slate-500 dark:text-slate-400 text-base md:text-lg leading-relaxed" data-th="เสียงต้อนรับอัตโนมัติเมื่อสแกนสำเร็จ ตั้งค่าข้อความได้เอง รองรับ MP3 และ Local TTS แบบ Offline" data-en="Auto voice greeting on scan success. Custom messages, MP3 audio, and local TTS — all work offline">เสียงต้อนรับอัตโนมัติเมื่อสแกนสำเร็จ ตั้งค่าข้อความได้เอง รองรับ MP3 และ Local TTS แบบ Offline</p>
+            <p class="text-slate-600 dark:text-slate-400 text-base md:text-lg leading-relaxed" data-th="เสียงต้อนรับอัตโนมัติเมื่อสแกนสำเร็จ ตั้งค่าข้อความได้เอง รองรับ MP3 และ Local TTS แบบ Offline" data-en="Auto voice greeting on scan success. Custom messages, MP3 audio, and local TTS — all work offline">เสียงต้อนรับอัตโนมัติเมื่อสแกนสำเร็จ ตั้งค่าข้อความได้เอง รองรับ MP3 และ Local TTS แบบ Offline</p>
           </div>
           <!-- 3. Smart Camera Detection -->
           <div class="bg-white dark:bg-navy-950 rounded-2xl p-8 border border-slate-200 dark:border-white/[0.06] hover:border-violet-500/30 card-hover fade-section stagger-3">
@@ -565,7 +564,7 @@
               <svg class="w-7 h-7 text-[#8B5CF6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
             </div>
             <h3 class="text-slate-900 dark:text-white font-bold text-xl mb-3" data-th="กล้องอัจฉริยะตรวจจับอัตโนมัติ" data-en="Smart Camera Detection">กล้องอัจฉริยะตรวจจับอัตโนมัติ</h3>
-            <p class="text-slate-500 dark:text-slate-400 text-base md:text-lg leading-relaxed" data-th="Face Detection + Proximity Detection ด้วย MediaPipe — ทักทายอัตโนมัติเมื่อเดินเข้ามา เตรียมบัตรเร็วขึ้น 40%" data-en="Face &amp; Proximity Detection via MediaPipe — auto-greet on approach, 40% faster badge prep">Face Detection + Proximity Detection ด้วย MediaPipe — ทักทายอัตโนมัติเมื่อเดินเข้ามา เตรียมบัตรเร็วขึ้น 40%</p>
+            <p class="text-slate-600 dark:text-slate-400 text-base md:text-lg leading-relaxed" data-th="Face Detection + Proximity Detection ด้วย MediaPipe — ทักทายอัตโนมัติเมื่อเดินเข้ามา เตรียมบัตรเร็วขึ้น 40%" data-en="Face &amp; Proximity Detection via MediaPipe — auto-greet on approach, 40% faster badge prep">Face Detection + Proximity Detection ด้วย MediaPipe — ทักทายอัตโนมัติเมื่อเดินเข้ามา เตรียมบัตรเร็วขึ้น 40%</p>
           </div>
           <!-- 4. Real-time Dashboard -->
           <div class="bg-white dark:bg-navy-950 rounded-2xl p-8 border border-slate-200 dark:border-white/[0.06] hover:border-violet-500/30 card-hover fade-section stagger-1">
@@ -573,7 +572,7 @@
               <svg class="w-7 h-7 text-[#8B5CF6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
             </div>
             <h3 class="text-slate-900 dark:text-white font-bold text-xl mb-3" data-th="แดชบอร์ดเรียลไทม์" data-en="Real-time Dashboard">แดชบอร์ดเรียลไทม์</h3>
-            <p class="text-slate-500 dark:text-slate-400 text-base md:text-lg leading-relaxed" data-th="ดู Live headcount ผ่านมือถือได้ทุกที่ แยกยอดตามหน่วยงาน ไม่ต้อง login แชร์ลิงก์ให้ทีมดูได้เลย" data-en="Live headcount on mobile, breakdown by department. No login needed — share the link with your team">ดู Live headcount ผ่านมือถือได้ทุกที่ แยกยอดตามหน่วยงาน ไม่ต้อง login แชร์ลิงก์ให้ทีมดูได้เลย</p>
+            <p class="text-slate-600 dark:text-slate-400 text-base md:text-lg leading-relaxed" data-th="ดู Live headcount ผ่านมือถือได้ทุกที่ แยกยอดตามหน่วยงาน ไม่ต้อง login แชร์ลิงก์ให้ทีมดูได้เลย" data-en="Live headcount on mobile, breakdown by department. No login needed — share the link with your team">ดู Live headcount ผ่านมือถือได้ทุกที่ แยกยอดตามหน่วยงาน ไม่ต้อง login แชร์ลิงก์ให้ทีมดูได้เลย</p>
           </div>
           <!-- 5. Name Search Fallback -->
           <div class="bg-white dark:bg-navy-950 rounded-2xl p-8 border border-slate-200 dark:border-white/[0.06] hover:border-violet-500/30 card-hover fade-section stagger-2">
@@ -581,7 +580,7 @@
               <svg class="w-7 h-7 text-[#8B5CF6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </div>
             <h3 class="text-slate-900 dark:text-white font-bold text-xl mb-3" data-th="ค้นหาชื่อ-นามสกุล" data-en="Name Search Fallback">ค้นหาชื่อ-นามสกุล</h3>
-            <p class="text-slate-500 dark:text-slate-400 text-base md:text-lg leading-relaxed" data-th="เช็คอินได้แม้ลืมบัตร ค้นหาแบบ Fuzzy พิมพ์บางส่วนก็เจอ รองรับ walk-in ทำงาน Offline" data-en="Check in without a badge. Fuzzy search with partial typing, supports walk-ins — fully offline">เช็คอินได้แม้ลืมบัตร ค้นหาแบบ Fuzzy พิมพ์บางส่วนก็เจอ รองรับ walk-in ทำงาน Offline</p>
+            <p class="text-slate-600 dark:text-slate-400 text-base md:text-lg leading-relaxed" data-th="เช็คอินได้แม้ลืมบัตร ค้นหาแบบ Fuzzy พิมพ์บางส่วนก็เจอ รองรับ walk-in ทำงาน Offline" data-en="Check in without a badge. Fuzzy search with partial typing, supports walk-ins — fully offline">เช็คอินได้แม้ลืมบัตร ค้นหาแบบ Fuzzy พิมพ์บางส่วนก็เจอ รองรับ walk-in ทำงาน Offline</p>
           </div>
           <!-- 6. PDPA Privacy & Security -->
           <div class="bg-white dark:bg-navy-950 rounded-2xl p-8 border border-slate-200 dark:border-white/[0.06] hover:border-violet-500/30 card-hover fade-section stagger-3">
@@ -589,12 +588,12 @@
               <svg class="w-7 h-7 text-[#8B5CF6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
             </div>
             <h3 class="text-slate-900 dark:text-white font-bold text-xl mb-3" data-th="ปลอดภัยตามมาตรฐาน PDPA" data-en="PDPA Privacy &amp; Security">ปลอดภัยตามมาตรฐาน PDPA</h3>
-            <p class="text-slate-500 dark:text-slate-400 text-base md:text-lg leading-relaxed" data-th="ข้อมูลชื่อเก็บในเครื่องเท่านั้น เฉพาะ Badge ID ที่ sync ขึ้น Cloud เข้ารหัส SHA-256 ทุกครั้ง" data-en="Names stored on-device only. Only badge IDs sync to cloud with SHA-256 encryption every time">ข้อมูลชื่อเก็บในเครื่องเท่านั้น เฉพาะ Badge ID ที่ sync ขึ้น Cloud เข้ารหัส SHA-256 ทุกครั้ง</p>
+            <p class="text-slate-600 dark:text-slate-400 text-base md:text-lg leading-relaxed" data-th="ข้อมูลชื่อเก็บในเครื่องเท่านั้น เฉพาะ Badge ID ที่ sync ขึ้น Cloud เข้ารหัส SHA-256 ทุกครั้ง" data-en="Names stored on-device only. Only badge IDs sync to cloud with SHA-256 encryption every time">ข้อมูลชื่อเก็บในเครื่องเท่านั้น เฉพาะ Badge ID ที่ sync ขึ้น Cloud เข้ารหัส SHA-256 ทุกครั้ง</p>
           </div>
         </div>
         <!-- Use case pill badges -->
         <div class="flex flex-wrap items-center justify-center gap-3 mt-12">
-          <span class="text-slate-500 dark:text-slate-400 text-base font-medium mr-2" data-th="เหมาะกับ:" data-en="Built for:">เหมาะกับ:</span>
+          <span class="text-slate-600 dark:text-slate-400 text-base font-medium mr-2" data-th="เหมาะกับ:" data-en="Built for:">เหมาะกับ:</span>
           <span class="bg-violet-500/10 text-[#8B5CF6] border border-violet-500/20 rounded-full px-4 py-1.5 text-sm font-semibold" data-th="สัมมนาองค์กร" data-en="Corporate">สัมมนาองค์กร</span>
           <span class="bg-violet-500/10 text-[#8B5CF6] border border-violet-500/20 rounded-full px-4 py-1.5 text-sm font-semibold" data-th="พิธีรับปริญญา" data-en="Graduation">พิธีรับปริญญา</span>
           <span class="bg-violet-500/10 text-[#8B5CF6] border border-violet-500/20 rounded-full px-4 py-1.5 text-sm font-semibold" data-th="นิทรรศการ" data-en="Exhibition">นิทรรศการ</span>
@@ -610,7 +609,7 @@
     <div class="max-w-6xl mx-auto px-6">
       <div class="fade-section">
         <div class="text-center mb-12">
-          <p class="text-[#8B5CF6] text-base font-semibold uppercase tracking-widest mb-4">Screenshots</p>
+          <p class="text-[#7c3aed] text-base font-semibold uppercase tracking-widest mb-4">Screenshots</p>
           <h2 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white" data-th="ดูหน้าตาระบบจริง" data-en="See the Real Interface">ดูหน้าตาระบบจริง</h2>
         </div>
         <div class="grid md:grid-cols-3 gap-6">
@@ -642,10 +641,10 @@
     <div class="max-w-4xl mx-auto px-6">
       <div class="fade-section">
         <div class="text-center mb-12">
-          <p class="text-[#8B5CF6] text-base font-semibold uppercase tracking-widest mb-4">Interactive Demo</p>
+          <p class="text-[#7c3aed] text-base font-semibold uppercase tracking-widest mb-4">Interactive Demo</p>
           <h2 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white" data-th="ลองใช้งานจริงตอนนี้เลย" data-en="Try It Right Now">ลองใช้งานจริงตอนนี้เลย</h2>
-          <p class="text-slate-500 dark:text-slate-400 text-lg md:text-xl mt-4" data-th="คลิกปุ่มสแกนหรือพิมพ์รหัสบัตร ดูการทำงานแบบ Offline-First" data-en="Click scan or type a badge ID — see Offline-First in action">คลิกปุ่มสแกนหรือพิมพ์รหัสบัตร ดูการทำงานแบบ Offline-First</p>
-          <p class="text-slate-400 dark:text-slate-500 text-base mt-2 italic" data-th="กด WiFi OFF เพื่อดูระบบทำงานแบบออฟไลน์" data-en="Toggle WiFi off to see offline mode in action">กด WiFi OFF เพื่อดูระบบทำงานแบบออฟไลน์</p>
+          <p class="text-slate-600 dark:text-slate-400 text-lg md:text-xl mt-4" data-th="คลิกปุ่มสแกนหรือพิมพ์รหัสบัตร ดูการทำงานแบบ Offline-First" data-en="Click scan or type a badge ID — see Offline-First in action">คลิกปุ่มสแกนหรือพิมพ์รหัสบัตร ดูการทำงานแบบ Offline-First</p>
+          <p class="text-slate-600 dark:text-slate-400 text-base mt-2 italic" data-th="กด WiFi OFF เพื่อดูระบบทำงานแบบออฟไลน์" data-en="Toggle WiFi off to see offline mode in action">กด WiFi OFF เพื่อดูระบบทำงานแบบออฟไลน์</p>
         </div>
 
         <!-- Kiosk Simulator -->
@@ -656,7 +655,7 @@
               <div class="w-7 h-7 rounded bg-gradient-to-br from-violet-600 to-fuchsia-500 flex items-center justify-center">
                 <span class="text-white font-bold text-xs">T</span>
               </div>
-              <span class="text-slate-500 dark:text-slate-400 text-sm font-semibold">TrackAttendance Kiosk — Gate A</span>
+              <span class="text-slate-600 dark:text-slate-400 text-sm font-semibold">TrackAttendance Kiosk — Gate A</span>
             </div>
             <div id="demo-wifi" class="flex items-center gap-1.5 text-sm transition-colors">
               <span id="demo-wifi-dot" class="w-2 h-2 rounded-full bg-[#8B5CF6]"></span>
@@ -674,32 +673,32 @@
 
             <!-- Quick scan buttons -->
             <div class="flex flex-wrap gap-2">
-              <button class="demo-quick-scan bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/[0.06] text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-lg text-sm font-mono transition-colors" data-badge="EMP-001">EMP-001</button>
-              <button class="demo-quick-scan bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/[0.06] text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-lg text-sm font-mono transition-colors" data-badge="EMP-002">EMP-002</button>
-              <button class="demo-quick-scan bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/[0.06] text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-lg text-sm font-mono transition-colors" data-badge="EMP-003">EMP-003</button>
-              <button class="demo-quick-scan bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/[0.06] text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-lg text-sm font-mono transition-colors" data-badge="EMP-004">EMP-004</button>
-              <button class="demo-quick-scan bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/[0.06] text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-lg text-sm font-mono transition-colors" data-badge="EMP-005">EMP-005</button>
-              <button id="demo-wifi-toggle" class="ml-auto bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors">WiFi OFF</button>
+              <button class="demo-quick-scan bg-slate-50 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/[0.06] text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-lg text-sm font-mono transition-colors" data-badge="EMP-001">EMP-001</button>
+              <button class="demo-quick-scan bg-slate-50 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/[0.06] text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-lg text-sm font-mono transition-colors" data-badge="EMP-002">EMP-002</button>
+              <button class="demo-quick-scan bg-slate-50 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/[0.06] text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-lg text-sm font-mono transition-colors" data-badge="EMP-003">EMP-003</button>
+              <button class="demo-quick-scan bg-slate-50 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/[0.06] text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-lg text-sm font-mono transition-colors" data-badge="EMP-004">EMP-004</button>
+              <button class="demo-quick-scan bg-slate-50 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/[0.06] text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-lg text-sm font-mono transition-colors" data-badge="EMP-005">EMP-005</button>
+              <button id="demo-wifi-toggle" class="ml-auto bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-500 dark:text-red-400 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors">WiFi OFF</button>
             </div>
 
             <!-- Result display -->
             <div id="demo-result" class="min-h-[140px] rounded-xl bg-slate-100 dark:bg-[#0f172a] border border-slate-200 dark:border-white/[0.06] p-5 flex items-center justify-center">
-              <p class="text-slate-400 dark:text-slate-500 text-lg text-center" data-th="สแกนบัตรเพื่อเริ่มเช็คอิน<br><span class='text-sm'>กดปุ่ม badge ด้านบน หรือพิมพ์แล้วกด Enter</span>" data-en="Scan a badge to check in<br><span class='text-sm'>Click a badge above or type and press Enter</span>">สแกนบัตรเพื่อเริ่มเช็คอิน<br><span class="text-sm">กดปุ่ม badge ด้านบน หรือพิมพ์แล้วกด Enter</span></p>
+              <p class="text-slate-600 dark:text-slate-400 text-lg text-center" data-th="สแกนบัตรเพื่อเริ่มเช็คอิน<br><span class='text-sm'>กดปุ่ม badge ด้านบน หรือพิมพ์แล้วกด Enter</span>" data-en="Scan a badge to check in<br><span class='text-sm'>Click a badge above or type and press Enter</span>">สแกนบัตรเพื่อเริ่มเช็คอิน<br><span class="text-sm">กดปุ่ม badge ด้านบน หรือพิมพ์แล้วกด Enter</span></p>
             </div>
 
             <!-- Stats bar -->
             <div class="grid grid-cols-3 gap-4">
               <div class="bg-slate-100 dark:bg-[#0f172a] rounded-xl p-4 border border-slate-200 dark:border-white/[0.06] text-center">
                 <div id="demo-count" class="text-3xl font-bold text-slate-900 dark:text-white">0</div>
-                <div class="text-slate-500 dark:text-slate-400 text-sm mt-1" data-th="เช็คอินแล้ว" data-en="Checked In">เช็คอินแล้ว</div>
+                <div class="text-slate-600 dark:text-slate-400 text-sm mt-1" data-th="เช็คอินแล้ว" data-en="Checked In">เช็คอินแล้ว</div>
               </div>
               <div class="bg-slate-100 dark:bg-[#0f172a] rounded-xl p-4 border border-slate-200 dark:border-white/[0.06] text-center">
-                <div id="demo-pending" class="text-3xl font-bold text-amber-400">0</div>
-                <div class="text-slate-500 dark:text-slate-400 text-sm mt-1" data-th="รอซิงก์" data-en="Pending Sync">รอซิงก์</div>
+                <div id="demo-pending" class="text-3xl font-bold text-amber-700 dark:text-amber-400">0</div>
+                <div class="text-slate-600 dark:text-slate-400 text-sm mt-1" data-th="รอซิงก์" data-en="Pending Sync">รอซิงก์</div>
               </div>
               <div class="bg-slate-100 dark:bg-[#0f172a] rounded-xl p-4 border border-slate-200 dark:border-white/[0.06] text-center">
                 <div id="demo-synced" class="text-3xl font-bold text-[#8B5CF6]">0</div>
-                <div class="text-slate-500 dark:text-slate-400 text-sm mt-1" data-th="ซิงก์แล้ว" data-en="Synced">ซิงก์แล้ว</div>
+                <div class="text-slate-600 dark:text-slate-400 text-sm mt-1" data-th="ซิงก์แล้ว" data-en="Synced">ซิงก์แล้ว</div>
               </div>
             </div>
 
@@ -716,23 +715,23 @@
     <div class="max-w-6xl mx-auto px-6">
       <div class="fade-section">
         <div class="text-center mb-16">
-          <p class="text-[#8B5CF6] text-base font-semibold uppercase tracking-widest mb-4">Pricing</p>
+          <p class="text-[#7c3aed] text-base font-semibold uppercase tracking-widest mb-4">Pricing</p>
           <h2 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white" data-th="ราคาที่ชัดเจน ไม่มีค่าใช้จ่ายซ่อน" data-en="Transparent Pricing — No Hidden Fees">ราคาที่ชัดเจน ไม่มีค่าใช้จ่ายซ่อน</h2>
-          <p class="text-slate-500 dark:text-slate-400 text-lg md:text-xl mt-4" data-th="จ่ายตามจำนวนงาน ไม่ต้อง subscribe รายเดือน" data-en="Pay per event — no monthly subscription">จ่ายตามจำนวนงาน ไม่ต้อง subscribe รายเดือน</p>
+          <p class="text-slate-600 dark:text-slate-400 text-lg md:text-xl mt-4" data-th="จ่ายตามจำนวนงาน ไม่ต้อง subscribe รายเดือน" data-en="Pay per event — no monthly subscription">จ่ายตามจำนวนงาน ไม่ต้อง subscribe รายเดือน</p>
         </div>
         <div class="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           <!-- Starter -->
           <div class="bg-slate-50 dark:bg-navy-900 rounded-2xl p-8 border border-slate-200 dark:border-white/[0.06] flex flex-col">
             <div class="mb-8">
               <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-1">Starter</h3>
-              <p class="text-slate-500 dark:text-slate-400 text-base" data-th="สำหรับงานขนาดเล็ก" data-en="For small events">สำหรับงานขนาดเล็ก</p>
+              <p class="text-slate-600 dark:text-slate-400 text-base" data-th="สำหรับงานขนาดเล็ก" data-en="For small events">สำหรับงานขนาดเล็ก</p>
             </div>
             <div class="mb-8">
               <div class="flex items-baseline gap-2">
                 <span class="text-4xl font-bold text-slate-900 dark:text-white">3,500</span>
                 <span class="text-[#8B5CF6] text-xl font-semibold">THB</span>
               </div>
-              <p class="text-slate-500 dark:text-slate-400 text-base mt-2" data-th="ต่องาน" data-en="per event">ต่องาน</p>
+              <p class="text-slate-600 dark:text-slate-400 text-base mt-2" data-th="ต่องาน" data-en="per event">ต่องาน</p>
               <p class="text-slate-600 dark:text-slate-300 text-base mt-1" data-th="รองรับผู้เข้าร่วมไม่เกิน 300 คน" data-en="Up to 300 attendees">รองรับผู้เข้าร่วมไม่เกิน 300 คน</p>
             </div>
             <ul class="space-y-4 mb-10 flex-1">
@@ -741,7 +740,7 @@
               <li class="flex items-start gap-3 text-base md:text-lg"><svg class="w-5 h-5 text-[#8B5CF6] flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><span class="text-slate-600 dark:text-slate-300" data-th="Offline-First สแกน" data-en="Offline-First scanning">Offline-First สแกน</span></li>
               <li class="flex items-start gap-3 text-base md:text-lg"><svg class="w-5 h-5 text-[#8B5CF6] flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><span class="text-slate-600 dark:text-slate-300">Cloud Dashboard + Excel Export</span></li>
             </ul>
-            <a href="#contact" class="block text-center border-2 border-slate-300 dark:border-white/15 hover:border-violet-500/40 text-slate-900 dark:text-white h-12 px-5 rounded-full font-bold text-lg transition-colors hover:bg-slate-100 dark:hover:bg-white/5 inline-flex items-center justify-center" data-th="ติดต่อสอบถาม" data-en="Contact Us">ติดต่อสอบถาม</a>
+            <a href="#contact" class="block text-center border-2 border-slate-300 dark:border-white/15 hover:border-violet-500/40 text-slate-900 dark:text-white h-12 px-5 rounded-full font-bold text-lg transition-colors hover:bg-slate-100 dark:hover:bg-slate-100 dark:bg-white/5 inline-flex items-center justify-center" data-th="ติดต่อสอบถาม" data-en="Contact Us">ติดต่อสอบถาม</a>
           </div>
           <!-- Professional -->
           <div class="rounded-2xl p-8 flex flex-col relative glow-card glow-card-animate glass-card shadow-lg shadow-violet-500/10">
@@ -750,14 +749,14 @@
             </div>
             <div class="mb-8">
               <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-1">Professional</h3>
-              <p class="text-slate-500 dark:text-slate-400 text-base" data-th="สำหรับงานขนาดกลาง-ใหญ่" data-en="For medium to large events">สำหรับงานขนาดกลาง-ใหญ่</p>
+              <p class="text-slate-600 dark:text-slate-400 text-base" data-th="สำหรับงานขนาดกลาง-ใหญ่" data-en="For medium to large events">สำหรับงานขนาดกลาง-ใหญ่</p>
             </div>
             <div class="mb-8">
               <div class="flex items-baseline gap-2">
                 <span class="text-4xl font-bold text-slate-900 dark:text-white">6,500</span>
                 <span class="text-[#8B5CF6] text-xl font-semibold">THB</span>
               </div>
-              <p class="text-slate-500 dark:text-slate-400 text-base mt-2" data-th="ต่องาน (5 สถานี)" data-en="per event (5 stations)">ต่องาน (5 สถานี)</p>
+              <p class="text-slate-600 dark:text-slate-400 text-base mt-2" data-th="ต่องาน (5 สถานี)" data-en="per event (5 stations)">ต่องาน (5 สถานี)</p>
               <p class="text-slate-600 dark:text-slate-300 text-base mt-1" data-th="รองรับผู้เข้าร่วม 300-1,000 คน" data-en="300–1,000 attendees">รองรับผู้เข้าร่วม 300-1,000 คน</p>
             </div>
             <ul class="space-y-4 mb-10 flex-1">
@@ -772,13 +771,13 @@
           <div class="bg-slate-50 dark:bg-navy-900 rounded-2xl p-8 border border-slate-200 dark:border-white/[0.06] flex flex-col">
             <div class="mb-8">
               <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-1">Enterprise</h3>
-              <p class="text-slate-500 dark:text-slate-400 text-base" data-th="สำหรับงานขนาดใหญ่พิเศษ" data-en="For large-scale events">สำหรับงานขนาดใหญ่พิเศษ</p>
+              <p class="text-slate-600 dark:text-slate-400 text-base" data-th="สำหรับงานขนาดใหญ่พิเศษ" data-en="For large-scale events">สำหรับงานขนาดใหญ่พิเศษ</p>
             </div>
             <div class="mb-8">
               <div class="flex items-baseline gap-2">
                 <span class="text-4xl font-bold text-slate-900 dark:text-white">Custom</span>
               </div>
-              <p class="text-slate-500 dark:text-slate-400 text-base mt-2" data-th="ตามขนาดงาน" data-en="Based on event size">ตามขนาดงาน</p>
+              <p class="text-slate-600 dark:text-slate-400 text-base mt-2" data-th="ตามขนาดงาน" data-en="Based on event size">ตามขนาดงาน</p>
               <p class="text-slate-600 dark:text-slate-300 text-base mt-1" data-th="รองรับผู้เข้าร่วม 1,000+ คน" data-en="1,000+ attendees">รองรับผู้เข้าร่วม 1,000+ คน</p>
             </div>
             <ul class="space-y-4 mb-10 flex-1">
@@ -787,11 +786,11 @@
               <li class="flex items-start gap-3 text-base md:text-lg"><svg class="w-5 h-5 text-[#8B5CF6] flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><span class="text-slate-600 dark:text-slate-300" data-th="On-site setup, custom branding" data-en="On-site setup, custom branding">On-site setup, custom branding</span></li>
               <li class="flex items-start gap-3 text-base md:text-lg"><svg class="w-5 h-5 text-[#8B5CF6] flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><span class="text-slate-600 dark:text-slate-300" data-th="API access &amp; integration" data-en="API access &amp; integration">API access &amp; integration</span></li>
             </ul>
-            <a href="#contact" class="block text-center border-2 border-slate-300 dark:border-white/15 hover:border-violet-500/40 text-slate-900 dark:text-white h-12 px-5 rounded-full font-bold text-lg transition-colors hover:bg-slate-100 dark:hover:bg-white/5 inline-flex items-center justify-center" data-th="ติดต่อเรา" data-en="Contact Us">ติดต่อเรา</a>
+            <a href="#contact" class="block text-center border-2 border-slate-300 dark:border-white/15 hover:border-violet-500/40 text-slate-900 dark:text-white h-12 px-5 rounded-full font-bold text-lg transition-colors hover:bg-slate-100 dark:hover:bg-slate-100 dark:bg-white/5 inline-flex items-center justify-center" data-th="ติดต่อเรา" data-en="Contact Us">ติดต่อเรา</a>
           </div>
         </div>
         <div class="text-center mt-10 space-y-3">
-          <p class="text-slate-500 dark:text-slate-400 text-base md:text-lg" data-th="เพิ่มสถานีสแกน <span class='text-[#8B5CF6] font-bold text-lg'>+1,500 THB</span> ต่อสถานี &nbsp;|&nbsp; ราคารวม VAT 7% แล้ว" data-en="Add scan station <span class='text-[#8B5CF6] font-bold text-lg'>+1,500 THB</span> per station &nbsp;|&nbsp; Prices include 7% VAT">เพิ่มสถานีสแกน <span class="text-[#8B5CF6] font-bold text-lg">+1,500 THB</span> ต่อสถานี &nbsp;|&nbsp; ราคารวม VAT 7% แล้ว</p>
+          <p class="text-slate-600 dark:text-slate-400 text-base md:text-lg" data-th="เพิ่มสถานีสแกน <span class='text-[#8B5CF6] font-bold text-lg'>+1,500 THB</span> ต่อสถานี &nbsp;|&nbsp; ราคารวม VAT 7% แล้ว" data-en="Add scan station <span class='text-[#8B5CF6] font-bold text-lg'>+1,500 THB</span> per station &nbsp;|&nbsp; Prices include 7% VAT">เพิ่มสถานีสแกน <span class="text-[#8B5CF6] font-bold text-lg">+1,500 THB</span> ต่อสถานี &nbsp;|&nbsp; ราคารวม VAT 7% แล้ว</p>
           <p class="text-[#8B5CF6] font-semibold text-base md:text-lg" data-th="จัดงานบ่อย? สอบถามแพ็กเกจรายปี ลด 20%" data-en="Frequent events? Ask about annual packages — save 20%">จัดงานบ่อย? สอบถามแพ็กเกจรายปี ลด 20%</p>
         </div>
       </div>
@@ -812,49 +811,49 @@
               <details class="group bg-slate-50 dark:bg-navy-900 rounded-2xl border border-slate-200 dark:border-white/[0.06] overflow-hidden">
                 <summary class="flex items-center justify-between p-6 text-slate-900 dark:text-white font-bold text-lg" data-th="ระบบทำงานแบบ Offline ได้อย่างไร?" data-en="How does offline mode work?">ระบบทำงานแบบ Offline ได้อย่างไร?</summary>
                 <div class="px-6 pb-6">
-                  <p class="text-slate-500 dark:text-slate-400 text-base leading-relaxed" data-th="ข้อมูลการสแกนจะบันทึกลงเครื่องทันทีผ่าน SQLite เมื่อมีอินเทอร์เน็ต ระบบจะซิงก์ขึ้นคลาวด์อัตโนมัติ ไม่มีข้อมูลสูญหายแม้เน็ตจะล่มทั้งงาน" data-en="Scan data saves locally via SQLite instantly. When internet returns, the system auto-syncs to cloud. Zero data loss even if WiFi is down the entire event.">ข้อมูลการสแกนจะบันทึกลงเครื่องทันทีผ่าน SQLite เมื่อมีอินเทอร์เน็ต ระบบจะซิงก์ขึ้นคลาวด์อัตโนมัติ ไม่มีข้อมูลสูญหายแม้เน็ตจะล่มทั้งงาน</p>
+                  <p class="text-slate-600 dark:text-slate-400 text-base leading-relaxed" data-th="ข้อมูลการสแกนจะบันทึกลงเครื่องทันทีผ่าน SQLite เมื่อมีอินเทอร์เน็ต ระบบจะซิงก์ขึ้นคลาวด์อัตโนมัติ ไม่มีข้อมูลสูญหายแม้เน็ตจะล่มทั้งงาน" data-en="Scan data saves locally via SQLite instantly. When internet returns, the system auto-syncs to cloud. Zero data loss even if WiFi is down the entire event.">ข้อมูลการสแกนจะบันทึกลงเครื่องทันทีผ่าน SQLite เมื่อมีอินเทอร์เน็ต ระบบจะซิงก์ขึ้นคลาวด์อัตโนมัติ ไม่มีข้อมูลสูญหายแม้เน็ตจะล่มทั้งงาน</p>
                 </div>
               </details>
               <details class="group bg-slate-50 dark:bg-navy-900 rounded-2xl border border-slate-200 dark:border-white/[0.06] overflow-hidden">
                 <summary class="flex items-center justify-between p-6 text-slate-900 dark:text-white font-bold text-lg" data-th="ต้องใช้อุปกรณ์สแกนแบบไหน?" data-en="What scanning hardware do I need?">ต้องใช้อุปกรณ์สแกนแบบไหน?</summary>
                 <div class="px-6 pb-6">
-                  <p class="text-slate-500 dark:text-slate-400 text-base leading-relaxed" data-th="รองรับเครื่องยิงบาร์โค้ด USB ทุกรุ่น (แนะนำ 2D scanner), กล้อง webcam สำหรับ QR Code, หรือพิมพ์รหัสด้วยคีย์บอร์ดก็ได้" data-en="Works with any USB barcode scanner (2D recommended), webcam for QR codes, or manual keyboard entry as backup.">รองรับเครื่องยิงบาร์โค้ด USB ทุกรุ่น (แนะนำ 2D scanner), กล้อง webcam สำหรับ QR Code, หรือพิมพ์รหัสด้วยคีย์บอร์ดก็ได้</p>
+                  <p class="text-slate-600 dark:text-slate-400 text-base leading-relaxed" data-th="รองรับเครื่องยิงบาร์โค้ด USB ทุกรุ่น (แนะนำ 2D scanner), กล้อง webcam สำหรับ QR Code, หรือพิมพ์รหัสด้วยคีย์บอร์ดก็ได้" data-en="Works with any USB barcode scanner (2D recommended), webcam for QR codes, or manual keyboard entry as backup.">รองรับเครื่องยิงบาร์โค้ด USB ทุกรุ่น (แนะนำ 2D scanner), กล้อง webcam สำหรับ QR Code, หรือพิมพ์รหัสด้วยคีย์บอร์ดก็ได้</p>
                 </div>
               </details>
               <details class="group bg-slate-50 dark:bg-navy-900 rounded-2xl border border-slate-200 dark:border-white/[0.06] overflow-hidden">
                 <summary class="flex items-center justify-between p-6 text-slate-900 dark:text-white font-bold text-lg" data-th="ข้อมูลส่วนบุคคลปลอดภัยแค่ไหน? (PDPA)" data-en="How is attendee data protected? (PDPA)">ข้อมูลส่วนบุคคลปลอดภัยแค่ไหน? (PDPA)</summary>
                 <div class="px-6 pb-6">
-                  <p class="text-slate-500 dark:text-slate-400 text-base leading-relaxed" data-th="ชื่อพนักงานเก็บไว้ในเครื่องเท่านั้น (SQLite) ไม่ขึ้นคลาวด์ ส่งขึ้นเฉพาะรหัสบัตร เข้ารหัส SHA-256 ทุกครั้งที่ซิงก์ เซิร์ฟเวอร์อยู่ใน Google Cloud ประเทศไทย (asia-southeast1)" data-en="Employee names stay local only (SQLite) — never uploaded. Only badge IDs sync to cloud with SHA-256 encryption. Server hosted on Google Cloud Thailand (asia-southeast1).">ชื่อพนักงานเก็บไว้ในเครื่องเท่านั้น (SQLite) ไม่ขึ้นคลาวด์ ส่งขึ้นเฉพาะรหัสบัตร เข้ารหัส SHA-256 ทุกครั้งที่ซิงก์ เซิร์ฟเวอร์อยู่ใน Google Cloud ประเทศไทย (asia-southeast1)</p>
+                  <p class="text-slate-600 dark:text-slate-400 text-base leading-relaxed" data-th="ชื่อพนักงานเก็บไว้ในเครื่องเท่านั้น (SQLite) ไม่ขึ้นคลาวด์ ส่งขึ้นเฉพาะรหัสบัตร เข้ารหัส SHA-256 ทุกครั้งที่ซิงก์ เซิร์ฟเวอร์อยู่ใน Google Cloud ประเทศไทย (asia-southeast1)" data-en="Employee names stay local only (SQLite) — never uploaded. Only badge IDs sync to cloud with SHA-256 encryption. Server hosted on Google Cloud Thailand (asia-southeast1).">ชื่อพนักงานเก็บไว้ในเครื่องเท่านั้น (SQLite) ไม่ขึ้นคลาวด์ ส่งขึ้นเฉพาะรหัสบัตร เข้ารหัส SHA-256 ทุกครั้งที่ซิงก์ เซิร์ฟเวอร์อยู่ใน Google Cloud ประเทศไทย (asia-southeast1)</p>
                 </div>
               </details>
               <details class="group bg-slate-50 dark:bg-navy-900 rounded-2xl border border-slate-200 dark:border-white/[0.06] overflow-hidden">
                 <summary class="flex items-center justify-between p-6 text-slate-900 dark:text-white font-bold text-lg" data-th="ใช้กับงานซ้ำๆ ได้ไหม?" data-en="Can I use it for recurring events?">ใช้กับงานซ้ำๆ ได้ไหม?</summary>
                 <div class="px-6 pb-6">
-                  <p class="text-slate-500 dark:text-slate-400 text-base leading-relaxed" data-th="ได้ครับ แต่ละงานจะแยก session กัน นำเข้ารายชื่อใหม่ได้ทุกครั้ง สะดวกสำหรับงานอบรมรายเดือน หรืองาน Town Hall ประจำ" data-en="Yes! Each event runs as a separate session. Import a new roster each time — perfect for monthly training or regular Town Halls.">ได้ครับ แต่ละงานจะแยก session กัน นำเข้ารายชื่อใหม่ได้ทุกครั้ง สะดวกสำหรับงานอบรมรายเดือน หรืองาน Town Hall ประจำ</p>
+                  <p class="text-slate-600 dark:text-slate-400 text-base leading-relaxed" data-th="ได้ครับ แต่ละงานจะแยก session กัน นำเข้ารายชื่อใหม่ได้ทุกครั้ง สะดวกสำหรับงานอบรมรายเดือน หรืองาน Town Hall ประจำ" data-en="Yes! Each event runs as a separate session. Import a new roster each time — perfect for monthly training or regular Town Halls.">ได้ครับ แต่ละงานจะแยก session กัน นำเข้ารายชื่อใหม่ได้ทุกครั้ง สะดวกสำหรับงานอบรมรายเดือน หรืองาน Town Hall ประจำ</p>
                 </div>
               </details>
               <details class="group bg-slate-50 dark:bg-navy-900 rounded-2xl border border-slate-200 dark:border-white/[0.06] overflow-hidden">
                 <summary class="flex items-center justify-between p-6 text-slate-900 dark:text-white font-bold text-lg" data-th="รองรับกี่สถานีพร้อมกัน?" data-en="How many stations can run simultaneously?">รองรับกี่สถานีพร้อมกัน?</summary>
                 <div class="px-6 pb-6">
-                  <p class="text-slate-500 dark:text-slate-400 text-base leading-relaxed" data-th="แพ็กเกจ Starter รองรับ 3 สถานี, Professional 5 สถานี, Enterprise 10+ สถานี เพิ่มสถานีได้ไม่จำกัดในราคา 1,500 บาท/สถานี" data-en="Starter supports 3 stations, Professional 5, Enterprise 10+. Add unlimited extra stations at 1,500 THB each.">แพ็กเกจ Starter รองรับ 3 สถานี, Professional 5 สถานี, Enterprise 10+ สถานี เพิ่มสถานีได้ไม่จำกัดในราคา 1,500 บาท/สถานี</p>
+                  <p class="text-slate-600 dark:text-slate-400 text-base leading-relaxed" data-th="แพ็กเกจ Starter รองรับ 3 สถานี, Professional 5 สถานี, Enterprise 10+ สถานี เพิ่มสถานีได้ไม่จำกัดในราคา 1,500 บาท/สถานี" data-en="Starter supports 3 stations, Professional 5, Enterprise 10+. Add unlimited extra stations at 1,500 THB each.">แพ็กเกจ Starter รองรับ 3 สถานี, Professional 5 สถานี, Enterprise 10+ สถานี เพิ่มสถานีได้ไม่จำกัดในราคา 1,500 บาท/สถานี</p>
                 </div>
               </details>
               <details class="group bg-slate-50 dark:bg-navy-900 rounded-2xl border border-slate-200 dark:border-white/[0.06] overflow-hidden">
                 <summary class="flex items-center justify-between p-6 text-slate-900 dark:text-white font-bold text-lg" data-th="รองรับไฟล์รูปแบบไหนสำหรับนำเข้ารายชื่อ?" data-en="What file formats are supported for roster import?">รองรับไฟล์รูปแบบไหนสำหรับนำเข้ารายชื่อ?</summary>
                 <div class="px-6 pb-6">
-                  <p class="text-slate-500 dark:text-slate-400 text-base leading-relaxed" data-th="รองรับ Excel (.xlsx, .xls) จับคู่คอลัมน์อัตโนมัติ รองรับหลายหน่วยงาน/แผนกในไฟล์เดียว" data-en="Excel files (.xlsx, .xls) with automatic column matching. Supports multiple departments in a single file.">รองรับ Excel (.xlsx, .xls) จับคู่คอลัมน์อัตโนมัติ รองรับหลายหน่วยงาน/แผนกในไฟล์เดียว</p>
+                  <p class="text-slate-600 dark:text-slate-400 text-base leading-relaxed" data-th="รองรับ Excel (.xlsx, .xls) จับคู่คอลัมน์อัตโนมัติ รองรับหลายหน่วยงาน/แผนกในไฟล์เดียว" data-en="Excel files (.xlsx, .xls) with automatic column matching. Supports multiple departments in a single file.">รองรับ Excel (.xlsx, .xls) จับคู่คอลัมน์อัตโนมัติ รองรับหลายหน่วยงาน/แผนกในไฟล์เดียว</p>
                 </div>
               </details>
               <details class="group bg-slate-50 dark:bg-navy-900 rounded-2xl border border-slate-200 dark:border-white/[0.06] overflow-hidden">
                 <summary class="flex items-center justify-between p-6 text-slate-900 dark:text-white font-bold text-lg" data-th="มีบริการติดตั้งหน้างานไหม?" data-en="Do you offer on-site setup support?">มีบริการติดตั้งหน้างานไหม?</summary>
                 <div class="px-6 pb-6">
-                  <p class="text-slate-500 dark:text-slate-400 text-base leading-relaxed" data-th="แพ็กเกจ Enterprise รวมบริการติดตั้งหน้างานและ custom branding ส่วนแพ็กเกจอื่นมีคู่มือและ LINE support ตลอดงาน" data-en="Enterprise package includes on-site setup and custom branding. Other packages come with documentation and LINE support during your event.">แพ็กเกจ Enterprise รวมบริการติดตั้งหน้างานและ custom branding ส่วนแพ็กเกจอื่นมีคู่มือและ LINE support ตลอดงาน</p>
+                  <p class="text-slate-600 dark:text-slate-400 text-base leading-relaxed" data-th="แพ็กเกจ Enterprise รวมบริการติดตั้งหน้างานและ custom branding ส่วนแพ็กเกจอื่นมีคู่มือและ LINE support ตลอดงาน" data-en="Enterprise package includes on-site setup and custom branding. Other packages come with documentation and LINE support during your event.">แพ็กเกจ Enterprise รวมบริการติดตั้งหน้างานและ custom branding ส่วนแพ็กเกจอื่นมีคู่มือและ LINE support ตลอดงาน</p>
                 </div>
               </details>
               <details class="group bg-slate-50 dark:bg-navy-900 rounded-2xl border border-slate-200 dark:border-white/[0.06] overflow-hidden">
                 <summary class="flex items-center justify-between p-6 text-slate-900 dark:text-white font-bold text-lg" data-th="ทดลองใช้ฟรีได้ไหม?" data-en="Is there a free trial?">ทดลองใช้ฟรีได้ไหม?</summary>
                 <div class="px-6 pb-6">
-                  <p class="text-slate-500 dark:text-slate-400 text-base leading-relaxed" data-th="ได้ครับ แอดไลน์เพื่อนัดเดโม่ฟรี เราจะ setup ระบบทดลองให้ท่านใช้งานจริงก่อนตัดสินใจ" data-en="Yes! Add us on LINE for a free demo. We'll set up a trial system for you to test before committing.">ได้ครับ แอดไลน์เพื่อนัดเดโม่ฟรี เราจะ setup ระบบทดลองให้ท่านใช้งานจริงก่อนตัดสินใจ</p>
+                  <p class="text-slate-600 dark:text-slate-400 text-base leading-relaxed" data-th="ได้ครับ แอดไลน์เพื่อนัดเดโม่ฟรี เราจะ setup ระบบทดลองให้ท่านใช้งานจริงก่อนตัดสินใจ" data-en="Yes! Add us on LINE for a free demo. We'll set up a trial system for you to test before committing.">ได้ครับ แอดไลน์เพื่อนัดเดโม่ฟรี เราจะ setup ระบบทดลองให้ท่านใช้งานจริงก่อนตัดสินใจ</p>
                 </div>
               </details>
             </div>
@@ -863,14 +862,14 @@
           <div id="contact" class="md:col-span-2">
             <div class="md:sticky md:top-24 space-y-6">
               <h3 class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white" data-th="พร้อมเริ่มต้นใช้งาน?" data-en="Ready to Get Started?">พร้อมเริ่มต้นใช้งาน?</h3>
-              <p class="text-slate-500 dark:text-slate-400 text-lg leading-relaxed" data-th="แอดไลน์เพื่อนัดดูเดโม่ฟรี หรือขอใบเสนอราคา" data-en="Add LINE for a free demo or get a quote">แอดไลน์เพื่อนัดดูเดโม่ฟรี หรือขอใบเสนอราคา</p>
+              <p class="text-slate-600 dark:text-slate-400 text-lg leading-relaxed" data-th="แอดไลน์เพื่อนัดดูเดโม่ฟรี หรือขอใบเสนอราคา" data-en="Add LINE for a free demo or get a quote">แอดไลน์เพื่อนัดดูเดโม่ฟรี หรือขอใบเสนอราคา</p>
               <a href="#" class="inline-flex items-center gap-3 bg-[#06C755] hover:bg-[#05b34d] text-white h-14 px-8 rounded-full font-bold text-xl transition-all hover:shadow-xl hover:shadow-[#06C755]/25 hover:-translate-y-0.5">
                 <svg class="w-8 h-8" viewBox="0 0 24 24" fill="currentColor"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
                 <span data-th="แอดไลน์สอบถาม" data-en="Chat on LINE">แอดไลน์สอบถาม</span>
               </a>
               <div class="flex items-center gap-4">
                 <div class="flex-1 h-px bg-slate-200 dark:bg-white/10"></div>
-                <span class="text-slate-400 dark:text-slate-500 text-base font-medium" data-th="หรือ" data-en="or">หรือ</span>
+                <span class="text-slate-600 dark:text-slate-400 text-base font-medium" data-th="หรือ" data-en="or">หรือ</span>
                 <div class="flex-1 h-px bg-slate-200 dark:bg-white/10"></div>
               </div>
               <div class="flex items-center gap-4 bg-slate-50 dark:bg-navy-900 border border-slate-200 dark:border-white/[0.06] rounded-2xl p-5">
@@ -878,7 +877,7 @@
                   <svg class="w-6 h-6 text-[#8B5CF6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                 </div>
                 <div class="text-left">
-                  <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Email</p>
+                  <p class="text-slate-600 dark:text-slate-400 text-sm font-medium">Email</p>
                   <p class="text-slate-900 dark:text-white text-base md:text-lg font-semibold">contact@trackattendance.com</p>
                 </div>
               </div>
@@ -887,7 +886,7 @@
                   <svg class="w-6 h-6 text-[#8B5CF6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
                 </div>
                 <div class="text-left">
-                  <p class="text-slate-500 dark:text-slate-400 text-sm font-medium" data-th="โทรศัพท์" data-en="Phone">โทรศัพท์</p>
+                  <p class="text-slate-600 dark:text-slate-400 text-sm font-medium" data-th="โทรศัพท์" data-en="Phone">โทรศัพท์</p>
                   <p class="text-slate-900 dark:text-white text-base md:text-lg font-semibold">0XX-XXX-XXXX</p>
                 </div>
               </div>
@@ -910,40 +909,40 @@
             </div>
             <span class="text-slate-900 dark:text-white font-bold text-lg">TrackAttendance</span>
           </div>
-          <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed" data-th="ระบบเช็คอินอีเวนต์ออฟไลน์<br>สแกนไวปานสายฟ้า เน็ตล่มงานก็ไม่สะดุด" data-en="Offline-first event check-in.<br>Lightning fast. Zero downtime.">ระบบเช็คอินอีเวนต์ออฟไลน์<br>สแกนไวปานสายฟ้า เน็ตล่มงานก็ไม่สะดุด</p>
+          <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed" data-th="ระบบเช็คอินอีเวนต์ออฟไลน์<br>สแกนไวปานสายฟ้า เน็ตล่มงานก็ไม่สะดุด" data-en="Offline-first event check-in.<br>Lightning fast. Zero downtime.">ระบบเช็คอินอีเวนต์ออฟไลน์<br>สแกนไวปานสายฟ้า เน็ตล่มงานก็ไม่สะดุด</p>
         </div>
         <!-- Product -->
         <div>
           <h4 class="text-slate-900 dark:text-white font-bold text-sm uppercase tracking-wider mb-4" data-th="ผลิตภัณฑ์" data-en="Product">ผลิตภัณฑ์</h4>
           <ul class="space-y-3 text-sm">
-            <li><a href="#how-it-works" class="text-slate-500 dark:text-slate-400 hover:text-[#8B5CF6] transition-colors" data-th="วิธีใช้งาน" data-en="How It Works">วิธีใช้งาน</a></li>
-            <li><a href="#demo" class="text-slate-500 dark:text-slate-400 hover:text-[#8B5CF6] transition-colors" data-th="ทดลองใช้" data-en="Try Demo">ทดลองใช้</a></li>
-            <li><a href="#pricing" class="text-slate-500 dark:text-slate-400 hover:text-[#8B5CF6] transition-colors" data-th="ราคา" data-en="Pricing">ราคา</a></li>
-            <li><a href="#faq" class="text-slate-500 dark:text-slate-400 hover:text-[#8B5CF6] transition-colors" data-th="คำถามที่พบบ่อย" data-en="FAQ">คำถามที่พบบ่อย</a></li>
+            <li><a href="#how-it-works" class="text-slate-600 dark:text-slate-400 hover:text-[#8B5CF6] transition-colors" data-th="วิธีใช้งาน" data-en="How It Works">วิธีใช้งาน</a></li>
+            <li><a href="#demo" class="text-slate-600 dark:text-slate-400 hover:text-[#8B5CF6] transition-colors" data-th="ทดลองใช้" data-en="Try Demo">ทดลองใช้</a></li>
+            <li><a href="#pricing" class="text-slate-600 dark:text-slate-400 hover:text-[#8B5CF6] transition-colors" data-th="ราคา" data-en="Pricing">ราคา</a></li>
+            <li><a href="#faq" class="text-slate-600 dark:text-slate-400 hover:text-[#8B5CF6] transition-colors" data-th="คำถามที่พบบ่อย" data-en="FAQ">คำถามที่พบบ่อย</a></li>
           </ul>
         </div>
         <!-- Company -->
         <div>
           <h4 class="text-slate-900 dark:text-white font-bold text-sm uppercase tracking-wider mb-4" data-th="บริษัท" data-en="Company">บริษัท</h4>
           <ul class="space-y-3 text-sm">
-            <li><a href="#contact" class="text-slate-500 dark:text-slate-400 hover:text-[#8B5CF6] transition-colors" data-th="ติดต่อเรา" data-en="Contact Us">ติดต่อเรา</a></li>
-            <li><a href="#" class="text-slate-500 dark:text-slate-400 hover:text-[#8B5CF6] transition-colors" data-th="นโยบายความเป็นส่วนตัว" data-en="Privacy Policy">นโยบายความเป็นส่วนตัว</a></li>
-            <li><a href="#" class="text-slate-500 dark:text-slate-400 hover:text-[#8B5CF6] transition-colors" data-th="เงื่อนไขการใช้งาน" data-en="Terms of Service">เงื่อนไขการใช้งาน</a></li>
+            <li><a href="#contact" class="text-slate-600 dark:text-slate-400 hover:text-[#8B5CF6] transition-colors" data-th="ติดต่อเรา" data-en="Contact Us">ติดต่อเรา</a></li>
+            <li><a href="#" class="text-slate-600 dark:text-slate-400 hover:text-[#8B5CF6] transition-colors" data-th="นโยบายความเป็นส่วนตัว" data-en="Privacy Policy">นโยบายความเป็นส่วนตัว</a></li>
+            <li><a href="#" class="text-slate-600 dark:text-slate-400 hover:text-[#8B5CF6] transition-colors" data-th="เงื่อนไขการใช้งาน" data-en="Terms of Service">เงื่อนไขการใช้งาน</a></li>
           </ul>
         </div>
         <!-- Contact -->
         <div>
           <h4 class="text-slate-900 dark:text-white font-bold text-sm uppercase tracking-wider mb-4" data-th="ช่องทางติดต่อ" data-en="Get in Touch">ช่องทางติดต่อ</h4>
           <ul class="space-y-3 text-sm">
-            <li class="text-slate-500 dark:text-slate-400">contact@trackattendance.com</li>
-            <li class="text-slate-500 dark:text-slate-400">0XX-XXX-XXXX</li>
-            <li><a href="#contact" class="text-[#06C755] hover:text-[#05b34d] font-semibold transition-colors">LINE Official</a></li>
+            <li class="text-slate-600 dark:text-slate-400">contact@trackattendance.com</li>
+            <li class="text-slate-600 dark:text-slate-400">0XX-XXX-XXXX</li>
+            <li><a href="#contact" class="text-[#047d3a] hover:text-[#05b34d] font-semibold transition-colors">LINE Official</a></li>
           </ul>
         </div>
       </div>
       <div class="pt-8 border-t border-slate-200 dark:border-white/[0.06] flex flex-col sm:flex-row items-center justify-between gap-4">
-        <p class="text-slate-400 dark:text-slate-500 text-sm">&copy; 2026 TrackAttendance. All rights reserved.</p>
-        <p class="text-slate-400 dark:text-slate-500 text-sm" data-th="สร้างด้วยความใส่ใจ ในประเทศไทย 🇹🇭" data-en="Made with care in Thailand 🇹🇭">สร้างด้วยความใส่ใจ ในประเทศไทย 🇹🇭</p>
+        <p class="text-slate-600 dark:text-slate-400 text-sm">&copy; 2026 TrackAttendance. All rights reserved.</p>
+        <p class="text-slate-600 dark:text-slate-400 text-sm" data-th="สร้างด้วยความใส่ใจ ในประเทศไทย 🇹🇭" data-en="Made with care in Thailand 🇹🇭">สร้างด้วยความใส่ใจ ในประเทศไทย 🇹🇭</p>
       </div>
     </div>
   </footer>
@@ -1003,7 +1002,7 @@
     // Navbar scroll
     const nav = document.querySelector('nav');
     window.addEventListener('scroll', () => {
-      nav.classList.toggle('border-white/15', window.scrollY > 20);
+      nav.classList.toggle('shadow-sm', window.scrollY > 20);
     });
 
     // Language toggle (TH/EN)
@@ -1110,11 +1109,11 @@
 
     function bumpEl(el) { el.classList.remove('counter-bump'); void el.offsetWidth; el.classList.add('counter-bump'); }
 
-    function addLog(msg, color = 'text-slate-400') {
+    function addLog(msg, color = 'text-slate-600 dark:text-slate-400') {
       const ts = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
       const div = document.createElement('div');
       div.className = `flex justify-between ${color} slide-up`;
-      div.innerHTML = `<span>${msg}</span><span class="text-slate-500 dark:text-slate-500">${ts}</span>`;
+      div.innerHTML = `<span>${msg}</span><span class="text-slate-600 dark:text-slate-400">${ts}</span>`;
       demoLog.prepend(div);
       if (demoLog.children.length > 8) demoLog.lastChild.remove();
     }
@@ -1125,15 +1124,15 @@
       const person = ATTENDEES[badge];
 
       if (!person) {
-        demoResult.innerHTML = `<div class="text-center slide-up"><p class="text-red-400 text-2xl font-bold mb-2">${t('notFound')}</p><p class="text-slate-400 text-lg font-mono">${badge}</p></div>`;
-        addLog(`Badge ${badge} — ${t('notFoundLog')}`, 'text-red-400');
+        demoResult.innerHTML = `<div class="text-center slide-up"><p class="text-red-500 dark:text-red-400 text-2xl font-bold mb-2">${t('notFound')}</p><p class="text-slate-600 dark:text-slate-400 text-lg font-mono">${badge}</p></div>`;
+        addLog(`Badge ${badge} — ${t('notFoundLog')}`, 'text-red-500 dark:text-red-400');
         return;
       }
 
       const displayName = currentLang === 'en' ? person.en : person.name;
       if (scanned.has(badge)) {
-        demoResult.innerHTML = `<div class="text-center slide-up"><p class="text-amber-400 text-2xl font-bold mb-2">${t('duplicate')}</p><p class="text-slate-900 dark:text-white text-xl">${displayName}</p><p class="text-slate-400 text-lg">${t('duplicateNote')}</p></div>`;
-        addLog(`${badge} ${displayName} — ${t('duplicateLog')}`, 'text-amber-400');
+        demoResult.innerHTML = `<div class="text-center slide-up"><p class="text-amber-700 dark:text-amber-400 text-2xl font-bold mb-2">${t('duplicate')}</p><p class="text-slate-900 dark:text-white text-xl">${displayName}</p><p class="text-slate-600 dark:text-slate-400 text-lg">${t('duplicateNote')}</p></div>`;
+        addLog(`${badge} ${displayName} — ${t('duplicateLog')}`, 'text-amber-700 dark:text-amber-400');
         return;
       }
 
@@ -1153,8 +1152,8 @@
             <svg class="w-8 h-8 text-[#8B5CF6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
           </div>
           <p class="text-slate-900 dark:text-white text-2xl font-bold">${displayName}</p>
-          <p class="text-slate-400 text-lg">${person.dept} &middot; <span class="font-mono text-sm">${badge}</span></p>
-          <p class="text-[#8B5CF6] text-base font-semibold">${t('greeting', greetName)}</p>
+          <p class="text-slate-600 dark:text-slate-400 text-lg">${person.dept} &middot; <span class="font-mono text-sm">${badge}</span></p>
+          <p class="text-[#6d28d9] text-base font-semibold">${t('greeting', greetName)}</p>
         </div>`;
 
       if (demoWifi) {
@@ -1166,7 +1165,7 @@
         pendingCount++;
         demoPending.textContent = pendingCount;
         bumpEl(demoPending);
-        addLog(`${badge} ${displayName} — ${t('pendingLog')}`, 'text-amber-400');
+        addLog(`${badge} ${displayName} — ${t('pendingLog')}`, 'text-amber-700 dark:text-amber-400');
       }
       demoInput.value = '';
     }
@@ -1188,10 +1187,10 @@
         demoWifiText.className = 'text-[#8B5CF6] font-medium';
         demoWifiText.textContent = 'Online';
         this.textContent = 'WiFi OFF';
-        this.className = 'ml-auto bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors';
+        this.className = 'ml-auto bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-500 dark:text-red-400 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors';
         // Auto-sync pending
         if (pendingCount > 0) {
-          addLog(t('syncingLog', pendingCount), 'text-violet-400');
+          addLog(t('syncingLog', pendingCount), 'text-violet-600 dark:text-violet-400');
           setTimeout(() => {
             syncedCount += pendingCount;
             demoSynced.textContent = syncedCount;
@@ -1203,11 +1202,11 @@
         }
       } else {
         demoWifiDot.className = 'w-2 h-2 rounded-full bg-red-400 wifi-pulse';
-        demoWifiText.className = 'text-red-400 font-medium';
+        demoWifiText.className = 'text-red-500 dark:text-red-400 font-medium';
         demoWifiText.textContent = 'Offline';
         this.textContent = 'WiFi ON';
         this.className = 'ml-auto bg-[#8B5CF6]/10 hover:bg-[#8B5CF6]/20 border border-[#8B5CF6]/20 text-[#8B5CF6] px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors';
-        addLog(t('offlineLog'), 'text-red-400');
+        addLog(t('offlineLog'), 'text-red-500 dark:text-red-400');
       }
     });
 
