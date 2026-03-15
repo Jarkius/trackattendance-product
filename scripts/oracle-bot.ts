@@ -433,19 +433,22 @@ async function main() {
   console.log(`   Owner Chat ID: ${OWNER_CHAT_ID}`);
   console.log(`   Chat history: ${chatHistory.length} entries loaded`);
 
-  // Use grammY runner for resilient polling
-  const runner = run(bot);
-
+  // Use bot.start() for polling (more compatible with Bun than grammY runner)
   console.log("🤖 Oracle Bot is running");
   await emitEvent("bot_started", "oracle-bot", { provider: AI_PROVIDER, historyEntries: chatHistory.length });
 
   // Graceful shutdown
   const stop = () => {
     console.log("🤖 Oracle Bot shutting down...");
-    runner.isRunning() && runner.stop();
+    bot.stop();
   };
   process.on("SIGINT", stop);
   process.on("SIGTERM", stop);
+
+  // Start polling (blocks until stopped)
+  await bot.start({
+    onStart: () => console.log("🤖 Polling started"),
+  });
 }
 
 main().catch((e) => {
