@@ -120,10 +120,24 @@ Don't build until the right pattern is chosen. Three approaches:
 - **Who**: CCBot's session_monitor.py does this internally
 - **Status**: Not yet implemented in oracle-bot. This is the winning pattern.
 
-### Evaluation test for next session:
-1. Start Claude in tmux pane
-2. Send a message via tmux send-keys
-3. Find the JSONL transcript file: `find ~/.claude/projects -name "*.jsonl" -newer /tmp/test-marker`
-4. Read the transcript — is Claude's response there in structured form?
-5. If yes → Pattern C wins. Port CCBot's monitor.
-6. If no → Fall back to Pattern B (SDK) or improve Pattern A (capture-pane)
+### ✅ EVALUATION COMPLETE — Pattern C Wins
+
+Tested: 1840 JSONL transcript files in `~/.claude/projects/`. Claude writes structured output with `type: assistant/user/progress`, `message.content` blocks (text, tool_use, tool_result, thinking). CCBot's `session_monitor.py` watches these files with byte-offset tracking.
+
+**Decision**: Absorb CCBot's JSONL monitoring pattern + best patterns from other repos into oracle-bot:
+
+| From | Pattern | Priority |
+|------|---------|----------|
+| CCBot | JSONL byte-offset polling + TranscriptParser | P1 — core monitoring |
+| CCBot | Interactive permission UI (inline keyboards) | P2 |
+| claude-code-telegram | Event bus for decoupled message routing | P3 |
+| claude-code-telegram | Audit logging + cost tracking | P4 |
+| secure-openclaw | Provider abstraction (swap AI backends) | P5 |
+| secure-openclaw | Multi-platform adapter (WhatsApp/Signal later) | P5 |
+
+All source code cloned in ghq for reference:
+- `~/ghq/github.com/six-ddc/ccmux/` (CCBot)
+- `~/ghq/github.com/RichardAtCT/claude-code-telegram/`
+- `~/ghq/github.com/ComposioHQ/secure-openclaw/`
+- `~/ghq/github.com/Soul-Brews-Studio/maw-js/`
+- Local extracts: `ψ/learn/ccbot-patterns/KEY-PATTERNS.md`
