@@ -73,3 +73,24 @@ Oracle Bot (@jarkius_bot) — SINGLE BOT
 ├── Oracle Nerve → known-fixes.json → self-healing
 └── [NEXT] Real-time Claude output monitoring (absorb from CCBot)
 ```
+
+## Design Decisions to Evaluate
+
+### SQLite vs JSONL for Oracle Nerve Data Layer
+
+Current: all data in JSONL files (events.jsonl, telegram-queue.jsonl, fix-requests.jsonl, chat-history.jsonl). Consider migrating to SQLite (`bun:sqlite` native support).
+
+**When to migrate**: If we add CCBot's high-frequency JSONL monitoring (writes every 2s), concurrent access from multiple processes will stress the file approach. That's the trigger.
+
+| | JSONL (now) | SQLite | Hybrid |
+|---|---|---|---|
+| Human readable | `cat file` | Need query tool | Both |
+| Concurrent writes | Fragile (fixed, but no locking) | WAL mode, safe | SQLite for live data |
+| Querying | Scan all lines | Indexes, fast | SQLite for queries |
+| Git friendly | Diffs visible | Binary blob | JSONL for archive |
+| Nothing is Deleted | Append-only natural | Need discipline | Append JSONL + SQLite |
+| Bun support | `appendFile` | `bun:sqlite` native | Both native |
+
+**Recommendation**: Hybrid — SQLite for live data (inbox, events, fix-requests), JSONL as append-only archive/audit trail. Evaluate when implementing CCBot monitoring port.
+
+**Decision**: Evaluate at start of next session, before porting CCBot patterns. The data layer choice affects how we implement the session monitor.
