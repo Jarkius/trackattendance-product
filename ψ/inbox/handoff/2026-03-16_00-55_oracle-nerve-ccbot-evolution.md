@@ -94,3 +94,36 @@ Current: all data in JSONL files (events.jsonl, telegram-queue.jsonl, fix-reques
 **Recommendation**: Hybrid — SQLite for live data (inbox, events, fix-requests), JSONL as append-only archive/audit trail. Evaluate when implementing CCBot monitoring port.
 
 **Decision**: Evaluate at start of next session, before porting CCBot patterns. The data layer choice affects how we implement the session monitor.
+
+## Priority 0: Evaluate Architecture Pattern FIRST
+
+Don't build until the right pattern is chosen. Three approaches:
+
+### Pattern A: tmux Bridge (same session)
+- **How**: tmux send-keys → Claude, tmux capture-pane → response
+- **Pro**: Same session desktop↔mobile, full context preserved
+- **Con**: CCBot 409 conflicts, capture-pane is raw text not structured
+- **Who**: CCBot, maw.js, our oracle-bot tmux functions
+- **Status**: tmux send-keys works, output capture is weak
+
+### Pattern B: SDK/API (separate sessions)
+- **How**: `claude -p` or Claude SDK spawns new session per task
+- **Pro**: Clean, no tmux dependency, structured output
+- **Con**: Separate session = loses context, can't resume on desktop
+- **Who**: claude-code-telegram (2091 stars), our oracle-bot headless /do
+- **Status**: Works but context is lost between tasks
+
+### Pattern C: JSONL Monitor + tmux Hybrid (best of both)
+- **How**: Claude runs in tmux. Monitor its JSONL transcript files (structured). Send input via tmux send-keys.
+- **Pro**: Same session (tmux), structured output (JSONL), real-time
+- **Con**: Needs to find transcript file path, more complex
+- **Who**: CCBot's session_monitor.py does this internally
+- **Status**: Not yet implemented in oracle-bot. This is the winning pattern.
+
+### Evaluation test for next session:
+1. Start Claude in tmux pane
+2. Send a message via tmux send-keys
+3. Find the JSONL transcript file: `find ~/.claude/projects -name "*.jsonl" -newer /tmp/test-marker`
+4. Read the transcript — is Claude's response there in structured form?
+5. If yes → Pattern C wins. Port CCBot's monitor.
+6. If no → Fall back to Pattern B (SDK) or improve Pattern A (capture-pane)
