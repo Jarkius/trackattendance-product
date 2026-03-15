@@ -1,11 +1,11 @@
 {
-  "version": 1,
-  "description": "TrackAttendance PULSE dispatch rules",
+  "version": 2,
+  "description": "TrackAttendance PULSE dispatch rules — including Oracle Nerve self-healing",
   "rules": [
     {
       "id": "landing-down",
       "trigger": { "event": "heartbeat:fail", "check": "Landing Page" },
-      "action": { "notify": true, "message": "🔴 Landing page is DOWN!" },
+      "action": { "notify": true, "autofix": true, "message": "🔴 Landing page is DOWN!" },
       "cooldown_minutes": 30
     },
     {
@@ -19,6 +19,54 @@
       "trigger": { "event": "qa:contrast-fail" },
       "action": { "notify": true, "message": "⚠️ Contrast issues found: ${data.count} failures" },
       "cooldown_minutes": 60
+    },
+    {
+      "id": "do-task-completed",
+      "trigger": { "event": "do_task_completed" },
+      "action": { "notify": true, "message": "✅ Task completed: ${data.task}" },
+      "cooldown_minutes": 0
+    },
+    {
+      "id": "do-task-failed",
+      "trigger": { "event": "do_task_failed" },
+      "action": { "notify": true, "message": "❌ Task failed: ${data.task}\n${data.error}" },
+      "cooldown_minutes": 0
+    },
+    {
+      "id": "nerve-error-autofix",
+      "trigger": { "event": "error" },
+      "action": { "notify": true, "autofix": true, "message": "⚠️ Error in ${data.agent}: ${data.error}" },
+      "cooldown_minutes": 5
+    },
+    {
+      "id": "nerve-heartbeat-fail",
+      "trigger": { "event": "heartbeat:fail" },
+      "action": { "notify": true, "autofix": true, "message": "🔴 Health: ${data.check} — ${data.detail}" },
+      "cooldown_minutes": 15
+    },
+    {
+      "id": "nerve-heartbeat-recover",
+      "trigger": { "event": "heartbeat:recover" },
+      "action": { "notify": true, "message": "🟢 Recovered: ${data.check}" },
+      "cooldown_minutes": 0
+    },
+    {
+      "id": "nerve-daemon-escalation",
+      "trigger": { "event": "daemon:escalation" },
+      "action": { "notify": true, "message": "🚨 Daemon ${data.name} escalation L${data.level}: ${data.action}" },
+      "cooldown_minutes": 0
+    },
+    {
+      "id": "nerve-daemon-recovered",
+      "trigger": { "event": "daemon:recovered" },
+      "action": { "notify": true, "message": "✅ ${data.name} recovered from L${data.fromLevel}!" },
+      "cooldown_minutes": 0
+    },
+    {
+      "id": "nerve-fix-result",
+      "trigger": { "event": "nerve:fix-result" },
+      "action": { "notify": true, "message": "🔧 Fix ${data.fixId}: exit ${data.exitCode}" },
+      "cooldown_minutes": 0
     }
   ]
 }

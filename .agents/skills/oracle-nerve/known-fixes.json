@@ -1,0 +1,27 @@
+{
+  "version": 2,
+  "description": "Known error patterns and their fixes. Curated by Claude and human together.",
+  "fixes": [
+    {
+      "id": "api-cold-start",
+      "match": { "agent": "heartbeat", "error_contains": "Cloud API" },
+      "fix": "curl -sf https://trackattendance-api-1093578683498.asia-southeast1.run.app/ > /dev/null 2>&1",
+      "description": "Cloud Run cold start — hit the endpoint to wake it",
+      "auto": true
+    },
+    {
+      "id": "bot-polling-conflict",
+      "match": { "agent": "oracle-bot", "error_contains": "409" },
+      "do_command": "Find and kill any duplicate bun processes running oracle-bot.ts or telegram-bot.ts that conflict with Telegram polling. Check with: ps aux | grep oracle-bot. Kill duplicates, keep one.",
+      "description": "Two bot instances polling same token causes 409 Conflict",
+      "auto": false
+    },
+    {
+      "id": "events-jsonl-corrupt",
+      "match": { "agent": "dispatch-engine", "error_contains": "JSON Parse error" },
+      "fix": "cd /Users/jarkius/workspace/products/trackattendance && python3 -c \"import json,sys; lines=open('ψ/pulse/events.jsonl').readlines(); valid=[l for l in lines if l.strip()]; [json.loads(l) for l in valid]; open('ψ/pulse/events.jsonl','w').writelines(valid); print(f'Cleaned: {len(lines)-len(valid)} bad lines removed')\"",
+      "description": "Remove malformed lines from events.jsonl",
+      "auto": true
+    }
+  ]
+}

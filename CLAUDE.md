@@ -79,8 +79,36 @@ Offline-first attendance tracking system with QR/barcode kiosk scanning and clou
 trackattendance/
 ├── trackattendance-api/       # Cloud API (its own git repo)
 ├── trackattendance-frontend/  # Desktop kiosk app (its own git repo)
+├── scripts/                   # Oracle Daemon ecosystem
+│   ├── lib/pulse.ts           # Shared PULSE module (events, notifications, logging)
+│   ├── oracle-daemon.ts       # Supervisor — self-healing escalation ladder (L1→L5)
+│   ├── oracle-bot.ts          # Telegram bot (grammY) — GPT bridge + /do
+│   ├── dispatch-engine.ts     # Event processor — rule matching + auto-fix
+│   └── heartbeat.ts           # Health sensor — state transition events
+├── .agents/skills/oracle-nerve/  # Self-healing skill definition + known-fixes
 └── ψ/                         # Oracle brain (root git repo)
+    ├── inbox/                 # telegram-queue.jsonl, fix-requests.jsonl, session-context.md
+    └── pulse/                 # events.jsonl, heartbeat.json, dispatch-rules.json
 ```
+
+### Oracle Nerve (Self-Healing Feedback Loop)
+
+> "Anyone can do wrong, but we keep better together."
+
+The daemon ecosystem uses a negative feedback loop — like an op-amp circuit that self-stabilizes:
+
+```
+Heartbeat (sensor) → PULSE event (error signal) → Dispatch (comparator)
+    → Auto-fix (actuator) → Next heartbeat verifies → Loop closes
+```
+
+- **Escalation ladder**: L1 restart → L2 reset → L3 notify → L4 Claude diagnose → L5 standby
+- **Known fixes**: `.agents/skills/oracle-nerve/known-fixes.json` — growing lookup table
+- **GPT ↔ Claude bridge**: `ψ/inbox/telegram-queue.jsonl` — all Telegram conversations logged for Claude
+- **Fix requests**: `ψ/inbox/fix-requests.jsonl` — unknown errors queued for Claude's next session
+- **Audit trail**: `ψ/pulse/events.jsonl` — every event logged, every action traceable
+
+**Start the daemon**: `bun scripts/oracle-daemon.ts` (supervises oracle-bot, dispatch-engine, heartbeat)
 
 **Data flow**: Badge scanned → JS keyboard listener → QWebChannel → Python → SQLite (pending) → batch sync → Fastify API → PostgreSQL
 
@@ -214,10 +242,18 @@ python scripts/debug_sync_performance.py
 - `/rrr` — Session retrospective
 - `/forward` — Handoff for next session
 
+#### When Monitoring or Healing
+- Check `ψ/inbox/fix-requests.jsonl` for open fix requests on session start
+- After fixing an error, add it to `.agents/skills/oracle-nerve/known-fixes.json` so it auto-heals next time
+- Check `ψ/inbox/telegram-queue.jsonl` for unread Telegram messages
+- Review `ψ/pulse/events.jsonl` for recent errors, escalations, or fix results
+
 #### Proactive Rules
 1. **Before writing UI** → check if there's a Figma file or brand colors to extract
 2. **Before deploying** → run a11y-checker on changed HTML
-3. **After errors** → log via self-improvement skill
+3. **After errors** → log via self-improvement skill + add to known-fixes.json
 4. **Before content** → check x-trends for timing
 5. **After research** → summarize findings, don't just dump raw data
 6. **When context is low** → use /recap, not manual re-reading
+7. **On session start** → check fix-requests.jsonl and telegram-queue.jsonl for unread items
+8. **After fixing a recurring bug** → add pattern to oracle-nerve/known-fixes.json

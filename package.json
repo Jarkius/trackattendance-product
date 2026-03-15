@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@grammyjs/runner": "^2.0.3",
+    "grammy": "^1.41.1"
+  }
+}
