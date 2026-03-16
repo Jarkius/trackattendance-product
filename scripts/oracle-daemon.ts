@@ -17,6 +17,7 @@ import { emitEvent, notifyTelegram, appendLine, log, CWD } from "./lib/pulse.ts"
 interface DaemonConfig {
   name: string;
   script: string;
+  cwd?: string;  // optional override (defaults to CWD)
   process: ReturnType<typeof Bun.spawn> | null;
   logFile: string;
   // Escalation state
@@ -33,6 +34,7 @@ const DAEMONS: DaemonConfig[] = [
   { name: "oracle-bot", script: "scripts/oracle-bot.ts", process: null, logFile: "/tmp/oracle-oracle-bot.log", escalationLevel: 0, restarts: 0, restartsThisHour: 0, lastRestartHour: 0, exitHistory: [], escalationTimer: null, standbyTimer: null },
   { name: "dispatch-engine", script: "scripts/dispatch-engine.ts", process: null, logFile: "/tmp/oracle-dispatch-engine.log", escalationLevel: 0, restarts: 0, restartsThisHour: 0, lastRestartHour: 0, exitHistory: [], escalationTimer: null, standbyTimer: null },
   { name: "heartbeat", script: "scripts/heartbeat.ts", process: null, logFile: "/tmp/oracle-heartbeat.log", escalationLevel: 0, restarts: 0, restartsThisHour: 0, lastRestartHour: 0, exitHistory: [], escalationTimer: null, standbyTimer: null },
+  { name: "cdp-proxy", script: "cdp-server.ts", cwd: "/Users/jarkius/workspace/tools/claude-browser-proxy", process: null, logFile: "/tmp/oracle-cdp-proxy.log", escalationLevel: 0, restarts: 0, restartsThisHour: 0, lastRestartHour: 0, exitHistory: [], escalationTimer: null, standbyTimer: null },
 ];
 
 // ─── Escalation Config ──────────────────────────────────────────────────────
@@ -77,7 +79,7 @@ function spawnDaemon(daemon: DaemonConfig): void {
     log("info", "daemon", `Starting ${daemon.name} (L${daemon.escalationLevel})`);
 
     const proc = Bun.spawn(["bun", daemon.script], {
-      cwd: CWD,
+      cwd: daemon.cwd || CWD,
       stdout: "pipe",
       stderr: "pipe",
       env: process.env,
@@ -305,9 +307,33 @@ async function main(): Promise<void> {
 
   await emitEvent("daemon:started", "oracle-daemon", { daemons: DAEMONS.map((d) => d.name) });
 
+  // Launch Chrome with CDP debug port before starting cdp-proxy
+  try {
+    Bun.spawn(["open", "-na", "Google Chrome", "--args", "--remote-debugging-port=9222"], { stdout: "pipe", stderr: "pipe" });
+    log("info", "daemon", "Chrome CDP launched on port 9222");
+  } catch (e) {
+    log("warn", "daemon", "Chrome CDP launch failed (may already be running)", { error: String(e) });
+  }
+
+  // Start all daemons
   for (const daemon of DAEMONS) {
     spawnDaemon(daemon);
   }
+
+  // ─── 6am Daily Report Scheduler ─────────────────────────────────
+  let lastReportDay = -1;
+  setInterval(() => {
+    const now = new Date();
+    const hour = now.getHours();
+    const minute = now.getMinutes();
+    const day = now.getDate();
+    if (hour === 6 && minute === 0 && day !== lastReportDay) {
+      lastReportDay = day;
+      log("info", "daemon", "6am daily report triggered");
+      emitEvent("report:daily", "oracle-daemon", {});
+      Bun.spawn(["bun", "scripts/daily-report.ts"], { cwd: CWD, env: process.env });
+    }
+  }, 30_000); // Check every 30s
 
   // Startup banner
   setTimeout(() => {
@@ -320,6 +346,7 @@ async function main(): Promise<void> {
     console.log(lines.join("\n"));
     console.log("");
     console.log("Escalation: L1→restart  L2→reset  L3→notify  L4→diagnose  L5→standby");
+    console.log("Daily report: 6:00 AM");
     console.log("");
   }, 500);
 
