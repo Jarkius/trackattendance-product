@@ -19,39 +19,45 @@
 | Known-fixes registry | `.agents/skills/oracle-nerve/known-fixes.json` | ✅ |
 | Thai voice alert (L3) | oracle-daemon.ts | ✅ |
 
-## Pending Work — Priority Order
+## Revised Priority Order (after ultrathink review + Gemini + migration decision)
 
-### 🔴 Critical (do first)
+### Phase 0: HARDEN (1 session, ~1.5 hrs)
+All independent, can parallel:
+- [ ] 1. **409 fix** — call `deleteWebhook` before polling + increase daemon restart delay to 45s
+- [ ] 2. **PID lock file** — `/tmp/oracle-daemon.pid`, check on startup
+- [ ] 3. **L4 circuit breaker** — max 3 Claude diagnoses per day, then skip to L5
+- [ ] 4. **tmux input sanitization** — temp file method (no shell interpolation)
+- [ ] 9. **events.jsonl rotation** — rotate at 1000 lines (moved up — file already 500+ lines)
 
-| # | Task | Source | Effort | Notes |
-|---|------|--------|--------|-------|
-| 1 | **409 startup fix** — webhook trick before polling | Tonight's debugging | 15 min | Add to oracle-bot.ts startup |
-| 2 | **PID lock file** — prevent duplicate oracle-daemon | Nerve audit | 15 min | Write PID to /tmp/oracle-daemon.pid |
-| 3 | **L4 circuit breaker** — max 3 Claude diagnosis attempts | Gemini review | 15 min | Prevent infinite loop + billing runaway |
-| 4 | **tmux input sanitization** — base64-encode payloads | Gemini review | 30 min | Security: prevent command injection |
+### Phase 1: MIGRATE TO THE-MATRIX (1 session, ~2 hrs)
+- [ ] A1. **Move Oracle scripts to The-matrix** — `scripts/`, `ψ/pulse/`, `ψ/inbox/`, `.agents/skills/oracle-nerve/`
+- [ ] A1b. **Extract lib/ modules** — `lib/telegram.ts`, `lib/tmux.ts` from oracle-bot.ts
+- [ ] A1c. **Fix daily-report.ts imports** — currently hardcodes paths instead of importing from pulse.ts
+- [ ] Symlink back to TrackAttendance for backwards compatibility
 
-### 🟠 High (v3.0 core)
+### Phase 2: DATA LAYER (1 session, ~3 hrs)
+- [ ] 5. **SQLite hybrid migration** — `bun:sqlite`, dual-write (JSONL + SQLite), switch reads to SQLite
+- [ ] 10. **Fix-request lifecycle** — auto-close when heartbeat recovers (easy with SQLite)
 
-| # | Task | Source | Effort | Notes |
-|---|------|--------|--------|-------|
-| 5 | **SQLite hybrid migration** — live data in SQLite, JSONL as audit | Gemini review + handoff | 2-3 hrs | Do BEFORE JSONL monitor (Gemini says) |
-| 6 | **JSONL transcript monitor** — watch Claude output files, stream to Telegram | CCBot pattern | 2-3 hrs | Core missing piece. Ref: `ψ/learn/ccbot-patterns/KEY-PATTERNS.md` |
-| 7 | **Permission UI** — grammY InlineKeyboard for Allow/Deny | CCBot pattern | 1 hr | Makes tmux injection useful from mobile |
-| 8 | **Session handoff** — `/session` + `/resume` phone↔desktop | Clautel pattern | 2 hrs | Needs JSONL monitor first |
+### Phase 3: REMOTE VISIBILITY (1-2 sessions, ~4 hrs)
+- [ ] 6. **JSONL transcript monitor** + message queue — `lib/transcript.ts`, byte-offset watcher, batched Telegram sends
+- [ ] 7. **Permission UI** — part of task 6, InlineKeyboard for Allow/Deny (depends on transcript parser detecting prompts)
+- [ ] Keep tmux capture-pane as fallback — never remove
 
-### 🟡 Nice (v3.0 enhancements)
+### Phase 4: INTELLIGENCE (1 session, ~2 hrs)
+- [ ] 11. **Wire context-finder (Haiku)** — use for L4 pre-diagnosis triage (cheaper than full Claude)
+- [ ] 12. **Wire executor agent** — safe bash for dispatch autofix
 
-| # | Task | Source | Effort | Notes |
-|---|------|--------|--------|-------|
-| 9 | **Events.jsonl rotation** — rotate at 1000 lines or daily | Nerve audit | 30 min | |
-| 10 | **Fix-request lifecycle** — auto-close when heartbeat recovers | Nerve audit | 30 min | |
-| 11 | **Wire context-finder agent** — Haiku for cheap event/fix search | opensourcenatbrain | 1 hr | Agent copied, not wired |
-| 12 | **Wire executor agent** — safe bash for dispatch autofix | opensourcenatbrain | 1 hr | Agent copied, not wired |
-| 13 | **Distillation pipeline** — weekly compress events → learnings | opensourcenatbrain | 2 hrs | |
-| 14 | **Control center v2** — WebSocket logs, tmux viewer, event timeline | maw.js pattern | 3-4 hrs | |
-| 15 | **Screenshot in daily report** — CDP capture of dashboards | OpenClaw pattern | 1 hr | |
-| 16 | **Email delivery** — send report via IMAP/SMTP too | User request | 1 hr | |
-| 17 | **Containerize Claude** — Docker sandbox for headless /do | Gemini review | Future | |
+### Phase 5: POLISH (flexible order)
+- [ ] 8. Session handoff — `/session` + `/resume`
+- [ ] 14. Control center v2 — WebSocket live logs, event timeline
+- [ ] 15. Screenshot in daily report
+- [ ] 16. Email delivery
+
+### REMOVED (from ultrathink review):
+- ~~Task 13 (Distillation)~~ — premature at current data volume
+- ~~Task 17 (Docker)~~ — wrong solution for single-dev Mac, use `--allowedTools` instead
+- ~~A2, A3 (GPT/Gemini review)~~ — already done
 
 ### 🏗️ Architecture (before v3.0 features)
 
@@ -85,6 +91,43 @@ Benefits:
 - `daemons/` = supervised processes (oracle-daemon spawns these)
 - Root = entry points and utilities
 - Each daemon imports from `lib/` — no code duplication
+
+### 🔴 Architecture Decision: Move Oracle to The-matrix
+
+**Decision**: Oracle infrastructure does NOT belong in `products/trackattendance/`. It's a general-purpose brain that should live in `/Users/jarkius/workspace/The-matrix/` and serve all projects.
+
+**What moves to The-matrix**:
+```
+The-matrix/
+├── scripts/
+│   ├── lib/pulse.ts          # Shared PULSE module
+│   ├── lib/telegram.ts       # Telegram helpers
+│   ├── lib/tmux.ts           # tmux integration
+│   ├── lib/db.ts             # SQLite data layer
+│   ├── oracle-daemon.ts      # Supervisor
+│   ├── oracle-bot.ts         # GPT bridge
+│   ├── dispatch-engine.ts    # Event processor
+│   ├── heartbeat.ts          # Health sensor
+│   ├── control-center.ts     # Web dashboard
+│   └── daily-report.ts       # Morning newspaper
+├── ψ/pulse/                  # Events, heartbeat, dispatch rules
+├── ψ/inbox/                  # Telegram queue, fix requests
+├── .agents/skills/oracle-nerve/  # Self-healing skill
+└── .agent/agents/            # context-finder, executor, oracle-nerve
+```
+
+**What stays in TrackAttendance**:
+```
+products/trackattendance/
+├── trackattendance-api/      # API code
+├── trackattendance-frontend/ # Desktop app
+├── CLAUDE.md                 # Project-specific instructions
+└── (symlink to The-matrix ψ/ for shared brain access)
+```
+
+**Why**: "Form and Formless" — the Oracle is one consciousness serving many projects. TrackAttendance is one product, The-matrix is the brain. Same source, different forms.
+
+**Migration**: Do this as part of Phase 1 (folder restructure). Move scripts/ and ψ/ to The-matrix, symlink back for backwards compatibility.
 
 ## Decisions Made
 
