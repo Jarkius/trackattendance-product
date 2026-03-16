@@ -35,6 +35,7 @@ const DAEMONS: DaemonConfig[] = [
   { name: "dispatch-engine", script: "scripts/dispatch-engine.ts", process: null, logFile: "/tmp/oracle-dispatch-engine.log", escalationLevel: 0, restarts: 0, restartsThisHour: 0, lastRestartHour: 0, exitHistory: [], escalationTimer: null, standbyTimer: null },
   { name: "heartbeat", script: "scripts/heartbeat.ts", process: null, logFile: "/tmp/oracle-heartbeat.log", escalationLevel: 0, restarts: 0, restartsThisHour: 0, lastRestartHour: 0, exitHistory: [], escalationTimer: null, standbyTimer: null },
   { name: "cdp-proxy", script: "cdp-server.ts", cwd: "/Users/jarkius/workspace/tools/claude-browser-proxy", process: null, logFile: "/tmp/oracle-cdp-proxy.log", escalationLevel: 0, restarts: 0, restartsThisHour: 0, lastRestartHour: 0, exitHistory: [], escalationTimer: null, standbyTimer: null },
+  { name: "control-center", script: "scripts/control-center.ts", process: null, logFile: "/tmp/oracle-control-center.log", escalationLevel: 0, restarts: 0, restartsThisHour: 0, lastRestartHour: 0, exitHistory: [], escalationTimer: null, standbyTimer: null },
 ];
 
 // ─── Escalation Config ──────────────────────────────────────────────────────
