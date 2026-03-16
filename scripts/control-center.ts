@@ -186,8 +186,8 @@ app.get("/", (c) => {
 <body>
   <h1>🧠 Oracle Control Center</h1>
   <div class="grid">
-    <div class="card">
-      <h2>Services</h2>
+    <div class="card" style="grid-column: span 2;">
+      <h2>Services <button class="btn" onclick="killOrphans()" style="float:right;background:#3a1a1a;border-color:#633;font-size:11px;">🧹 Kill Orphans</button></h2>
       <div id="services">Loading...</div>
     </div>
     <div class="card">
@@ -213,10 +213,8 @@ app.get("/", (c) => {
     <div class="card">
       <h2>Actions</h2>
       <button class="btn" onclick="sendReport()">📊 Send Report</button>
-      <button class="btn" onclick="killOrphans()" style="background:#3a1a1a;border-color:#633;">🧹 Kill Orphans</button>
-      <button class="btn" onclick="restartDaemon('oracle-bot')">🔄 Restart Bot</button>
-      <button class="btn" onclick="restartDaemon('dispatch-engine')">🔄 Restart Dispatch</button>
-      <button class="btn" onclick="restartDaemon('heartbeat')">🔄 Restart Heartbeat</button>
+      <button class="btn" onclick="location.href='http://localhost:3456'">🖥️ maw.js UI</button>
+      <button class="btn" onclick="location.href='http://localhost:9222/json'">🔍 CDP Tabs</button>
     </div>
   </div>
   <div id="updated"></div>
@@ -231,7 +229,7 @@ app.get("/", (c) => {
 
         // Services
         const svc = Object.entries(status.daemons).map(([name, d]) =>
-          '<div class="service"><span><span class="dot ' + (d.running ? 'on' : 'off') + '"></span><span class="name">' + name + '</span></span><span class="pids">' + (d.running ? 'PID ' + d.pids.join(',') : 'stopped') + '</span></div>'
+          '<div class="service"><span><span class="dot ' + (d.running ? 'on' : 'off') + '"></span><span class="name">' + name + '</span> <span class="pids">' + (d.running ? 'PID ' + d.pids.join(',') : 'stopped') + '</span></span><span><button class="btn" onclick="restartDaemon(\'' + name + '\')" style="font-size:10px;padding:2px 8px;">🔄</button></span></div>'
         ).join('');
         document.getElementById('services').innerHTML = svc;
 
