@@ -100,6 +100,40 @@ app.get("/api/events", async (c) => {
   }
 });
 
+// Kill orphan processes (stale claude -p, duplicate bots, etc.)
+app.post("/api/kill-orphans", async (c) => {
+  const killed: string[] = [];
+  // Kill stale claude -p processes
+  try {
+    const proc = Bun.spawn(["bash", "-c", "pgrep -f 'claude.*-p' | grep -v $PPID"], { stdout: "pipe" });
+    const pids = (await new Response(proc.stdout).text()).trim().split("\n").filter(Boolean);
+    for (const pid of pids) {
+      try { process.kill(Number(pid), 9); killed.push(`claude-p:${pid}`); } catch {}
+    }
+  } catch {}
+  // Kill duplicate ccbot
+  try {
+    const proc = Bun.spawn(["pgrep", "-f", "ccbot"], { stdout: "pipe" });
+    const pids = (await new Response(proc.stdout).text()).trim().split("\n").filter(Boolean);
+    for (const pid of pids) {
+      try { process.kill(Number(pid), 9); killed.push(`ccbot:${pid}`); } catch {}
+    }
+  } catch {}
+  return c.json({ killed });
+});
+
+// Restart a specific daemon (kills + oracle-daemon will auto-restart it)
+app.post("/api/restart/:daemon", async (c) => {
+  const daemon = c.req.param("daemon");
+  try {
+    const proc = Bun.spawn(["pkill", "-f", daemon], { stdout: "pipe" });
+    await proc.exited;
+    return c.json({ restarted: daemon, note: "oracle-daemon will auto-restart it" });
+  } catch (e) {
+    return c.json({ error: String(e) }, 500);
+  }
+});
+
 app.get("/api/report", async (c) => {
   try {
     const proc = Bun.spawn(["bun", "scripts/daily-report.ts"], { cwd: CWD, stdout: "pipe", env: process.env });
@@ -178,7 +212,11 @@ app.get("/", (c) => {
     </div>
     <div class="card">
       <h2>Actions</h2>
-      <button class="btn" onclick="sendReport()">📊 Send Daily Report</button>
+      <button class="btn" onclick="sendReport()">📊 Send Report</button>
+      <button class="btn" onclick="killOrphans()" style="background:#3a1a1a;border-color:#633;">🧹 Kill Orphans</button>
+      <button class="btn" onclick="restartDaemon('oracle-bot')">🔄 Restart Bot</button>
+      <button class="btn" onclick="restartDaemon('dispatch-engine')">🔄 Restart Dispatch</button>
+      <button class="btn" onclick="restartDaemon('heartbeat')">🔄 Restart Heartbeat</button>
     </div>
   </div>
   <div id="updated"></div>
@@ -232,6 +270,19 @@ app.get("/", (c) => {
       const r = await fetch('/api/report');
       const d = await r.json();
       alert(d.sent ? 'Report sent!' : 'Failed: ' + d.error);
+    }
+    async function killOrphans() {
+      const r = await fetch('/api/kill-orphans', {method:'POST'});
+      const d = await r.json();
+      alert('Killed: ' + (d.killed.length > 0 ? d.killed.join(', ') : 'none found'));
+      refresh();
+    }
+    async function restartDaemon(name) {
+      if (!confirm('Restart ' + name + '?')) return;
+      const r = await fetch('/api/restart/' + name, {method:'POST'});
+      const d = await r.json();
+      alert(d.restarted ? name + ' restarting...' : 'Error: ' + d.error);
+      setTimeout(refresh, 3000);
     }
 
     refresh();
