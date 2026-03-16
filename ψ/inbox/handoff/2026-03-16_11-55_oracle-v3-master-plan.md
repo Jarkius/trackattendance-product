@@ -92,7 +92,13 @@ Benefits:
 - Root = entry points and utilities
 - Each daemon imports from `lib/` — no code duplication
 
-### 🔴 Architecture Decision: Move Oracle to The-matrix
+### 🔴 Architecture Decision: EXTRACT Oracle Nerve as Independent Package
+
+**REVISED** — Third-party architect review + The-matrix's own SOUL.md ("Beetle: Build swarms, not monoliths", "Cauldron: Separate concerns", "The Matrix Is Portable") both say: DON'T merge into The-matrix. Extract to `~/workspace/tools/oracle-nerve/` as its own portable package.
+
+See full plan: `/Users/jarkius/.claude/plans/zesty-growing-mango.md`
+
+~~### OLD: Move Oracle to The-matrix~~
 
 **Decision**: Oracle infrastructure does NOT belong in `products/trackattendance/`. It's a general-purpose brain that should live in `/Users/jarkius/workspace/The-matrix/` and serve all projects.
 
