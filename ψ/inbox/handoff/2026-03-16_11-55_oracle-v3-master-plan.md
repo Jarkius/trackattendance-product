@@ -53,6 +53,39 @@
 | 16 | **Email delivery** — send report via IMAP/SMTP too | User request | 1 hr | |
 | 17 | **Containerize Claude** — Docker sandbox for headless /do | Gemini review | Future | |
 
+### 🏗️ Architecture (before v3.0 features)
+
+| # | Task | Effort | Notes |
+|---|------|--------|-------|
+| A1 | **Modular folder restructure** — separate concerns into proper modules | 1-2 hrs | See proposed structure below |
+| A2 | **GPT review of master plan** — send to GPT for second opinion | 30 min | Via oracle-bot or direct |
+| A3 | **Gemini deep research on folder patterns** — how OpenClaw/maw.js structure code | 30 min | Learn from their structure |
+
+### Proposed Folder Structure
+
+```
+scripts/
+├── lib/
+│   ├── pulse.ts          # Shared: events, notifications, logging (EXISTS)
+│   ├── telegram.ts       # Telegram API helpers (extract from oracle-bot)
+│   ├── tmux.ts           # tmux send-keys, capture, find pane (extract from oracle-bot)
+│   └── db.ts             # SQLite/JSONL data layer (new — when SQLite migration)
+├── daemons/
+│   ├── oracle-bot.ts     # Telegram bot (move from scripts/)
+│   ├── dispatch-engine.ts # Event processor (move from scripts/)
+│   ├── heartbeat.ts      # Health sensor (move from scripts/)
+│   └── control-center.ts # Web dashboard (move from scripts/)
+├── oracle-daemon.ts      # Supervisor (stays at scripts/ root)
+├── daily-report.ts       # Morning newspaper (stays at scripts/ root)
+└── inbox-daemon.ts       # CLI utility (stays or delete)
+```
+
+Benefits:
+- `lib/` = shared modules (import from anywhere)
+- `daemons/` = supervised processes (oracle-daemon spawns these)
+- Root = entry points and utilities
+- Each daemon imports from `lib/` — no code duplication
+
 ## Decisions Made
 
 | Decision | Source | Rationale |
