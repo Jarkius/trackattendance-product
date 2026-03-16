@@ -229,7 +229,7 @@ app.get("/", (c) => {
 
         // Services
         const svc = Object.entries(status.daemons).map(([name, d]) =>
-          '<div class="service"><span><span class="dot ' + (d.running ? 'on' : 'off') + '"></span><span class="name">' + name + '</span> <span class="pids">' + (d.running ? 'PID ' + d.pids.join(',') : 'stopped') + '</span></span><span><button class="btn" onclick="restartDaemon(\'' + name + '\')" style="font-size:10px;padding:2px 8px;">🔄</button></span></div>'
+          '<div class="service"><span><span class="dot ' + (d.running ? 'on' : 'off') + '"></span><span class="name">' + name + '</span> <span class="pids">' + (d.running ? 'PID ' + d.pids.join(',') : 'stopped') + '</span></span><span><button class="btn" onclick="restartDaemon(&apos;' + name + '&apos;)" style="font-size:10px;padding:2px 8px;">🔄</button></span></div>'
         ).join('');
         document.getElementById('services').innerHTML = svc;
 
