@@ -136,47 +136,76 @@ async function generateReport(): Promise<string> {
   }
   parts.push("");
 
-  // ─── INTELLIGENCE SECTION ────────────────────────────────────────
+  // ─── MORNING NEWSPAPER ───────────────────────────────────────────
 
-  // 8. HN Top Stories
-  try {
-    const hnRes = await fetch("https://hacker-news.firebaseio.com/v0/topstories.json", { signal: AbortSignal.timeout(5000) });
-    const hnIds = (await hnRes.json() as number[]).slice(0, 5);
-    const stories = await Promise.all(hnIds.map(async (id) => {
-      const r = await fetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json`, { signal: AbortSignal.timeout(3000) });
-      return r.json() as Promise<{ title: string; score: number; url?: string }>;
-    }));
-    parts.push(`<b>🔶 Hacker News Top 5</b>`);
-    for (const s of stories) {
-      parts.push(`  ${s.score}⬆ ${s.title}`);
-    }
-    parts.push("");
-  } catch {
-    parts.push("HN: unavailable");
-    parts.push("");
-  }
+  // 8. AI News (HN + TechCrunch + Ars — 6 articles with links)
+  const aiArticles: Array<{ title: string; url: string; source: string; score?: number }> = [];
 
-  // 9. X/Twitter Trends (Thailand)
+  // HN AI stories (with links)
   try {
-    const xRes = await fetch("https://getdaytrends.com/thailand/", { signal: AbortSignal.timeout(5000) });
-    const xHtml = await xRes.text();
-    const trends = [...xHtml.matchAll(/<td class="main"><a[^>]*>([^<]+)<\/a>/g)].slice(0, 8).map(m => m[1]);
-    if (trends.length > 0) {
-      parts.push(`<b>🐦 X Trends (Thailand)</b>`);
-      parts.push(`  ${trends.join(" · ")}`);
-      parts.push("");
+    const hnRes = await fetch("https://hn.algolia.com/api/v1/search?query=AI+LLM+Claude+GPT+agent&tags=story&hitsPerPage=10", { signal: AbortSignal.timeout(5000) });
+    const hnData = await hnRes.json() as any;
+    for (const h of (hnData.hits || []).slice(0, 4)) {
+      if (h.url) aiArticles.push({ title: h.title, url: h.url, source: "HN", score: h.points });
     }
   } catch {}
 
-  // 10. BBC Top Headlines
+  // TechCrunch AI (RSS with links)
+  try {
+    const tcRes = await fetch("https://techcrunch.com/category/artificial-intelligence/feed/", {
+      signal: AbortSignal.timeout(5000),
+      headers: { "User-Agent": "Oracle/1.0" },
+    });
+    const tcXml = await tcRes.text();
+    const tcItems = [...tcXml.matchAll(/<item>[\s\S]*?<title>(?:<!\[CDATA\[)?([^\]<]+)[\s\S]*?<link>([^<]+)<\/link>[\s\S]*?<\/item>/g)];
+    for (const m of tcItems.slice(0, 3)) {
+      aiArticles.push({ title: m[1].trim(), url: m[2].trim(), source: "TC" });
+    }
+  } catch {}
+
+  // Ars Technica AI (RSS with links)
+  try {
+    const arsRes = await fetch("https://feeds.arstechnica.com/arstechnica/technology-lab", {
+      signal: AbortSignal.timeout(5000),
+      headers: { "User-Agent": "Oracle/1.0" },
+    });
+    const arsXml = await arsRes.text();
+    const arsItems = [...arsXml.matchAll(/<item>[\s\S]*?<title>([^<]+)<\/title>[\s\S]*?<link>([^<]+)<\/link>[\s\S]*?<\/item>/g)];
+    for (const m of arsItems.slice(0, 3)) {
+      const title = m[1].trim();
+      if (/ai|llm|gpt|claude|agent|model|openai|anthropic|google|gemini/i.test(title)) {
+        aiArticles.push({ title, url: m[2].trim(), source: "Ars" });
+      }
+    }
+  } catch {}
+
+  // Pick top 6, deduplicate
+  const seen = new Set<string>();
+  const top6 = aiArticles.filter(a => {
+    const key = a.title.toLowerCase().slice(0, 30);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).slice(0, 6);
+
+  if (top6.length > 0) {
+    parts.push(`<b>🤖 AI Morning Read</b>`);
+    for (const a of top6) {
+      const scoreStr = a.score ? ` (${a.score}⬆)` : "";
+      parts.push(`  • <a href="${a.url}">${a.title}</a>${scoreStr}`);
+    }
+    parts.push("");
+  }
+
+  // 9. BBC Top Headlines (with links)
   try {
     const bbcRes = await fetch("https://feeds.bbci.co.uk/news/rss.xml", { signal: AbortSignal.timeout(5000) });
     const bbcXml = await bbcRes.text();
-    const headlines = [...bbcXml.matchAll(/<title><!\[CDATA\[([^\]]+)\]\]><\/title>/g)].slice(1, 6).map(m => m[1]);
-    if (headlines.length > 0) {
-      parts.push(`<b>📰 BBC Headlines</b>`);
-      for (const h of headlines) {
-        parts.push(`  • ${h}`);
+    const bbcItems = [...bbcXml.matchAll(/<item>[\s\S]*?<title><!\[CDATA\[([^\]]+)\]\]><\/title>[\s\S]*?<link>([^<]+)<\/link>[\s\S]*?<\/item>/g)];
+    if (bbcItems.length > 0) {
+      parts.push(`<b>📰 World Headlines</b>`);
+      for (const m of bbcItems.slice(0, 4)) {
+        parts.push(`  • <a href="${m[2].trim()}">${m[1].trim()}</a>`);
       }
       parts.push("");
     }
