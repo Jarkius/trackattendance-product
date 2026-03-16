@@ -158,6 +158,16 @@ products/trackattendance/
 | Distillation pipeline pattern | `ψ/learn/distillation-pattern.md` |
 | Cloned repos for reference | `~/ghq/github.com/{six-ddc/ccmux, RichardAtCT/claude-code-telegram, ComposioHQ/secure-openclaw, Soul-Brews-Studio/maw-js}` |
 
+## Cross-Agent Handoff
+
+| Date | Target | File |
+|------|--------|------|
+| 2026-03-16 | The-matrix | `~/workspace/The-matrix/psi/swarm/handoffs/2026-03-16_oracle-nerve-to-matrix_evolution-patterns.md` |
+
+**Purpose**: Knowledge transfer of all battle-tested patterns, code snippets, tool evaluations, Gemini architecture review, and third-party architect warnings — for The-matrix to evolve independently. NOT a code migration.
+
+**How The-matrix receives it**: BOOT.md Step 8 scans `psi/swarm/handoffs/` for new handoffs. The-matrix reads, evaluates, and makes its own decisions.
+
 ## Session Retrospectives
 
 | Date | File | Focus |
