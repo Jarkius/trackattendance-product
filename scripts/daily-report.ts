@@ -127,15 +127,61 @@ async function generateReport(): Promise<string> {
 
   // 7. Daemon Status
   try {
-    const ps = Bun.spawn(["pgrep", "-af", "oracle-bot|dispatch-engine|heartbeat"], { stdout: "pipe" });
+    const ps = Bun.spawn(["pgrep", "-af", "oracle-bot|dispatch-engine|heartbeat|cdp-server|control-center"], { stdout: "pipe" });
     const psOut = (await new Response(ps.stdout).text()).trim();
     const running = psOut.split("\n").filter(Boolean).length;
-    parts.push(`<b>Daemons</b> — ${running}/3 running`);
+    parts.push(`<b>Daemons</b> — ${running}/5 running`);
   } catch {
     parts.push("Daemons: check failed");
   }
-
   parts.push("");
+
+  // ─── INTELLIGENCE SECTION ────────────────────────────────────────
+
+  // 8. HN Top Stories
+  try {
+    const hnRes = await fetch("https://hacker-news.firebaseio.com/v0/topstories.json", { signal: AbortSignal.timeout(5000) });
+    const hnIds = (await hnRes.json() as number[]).slice(0, 5);
+    const stories = await Promise.all(hnIds.map(async (id) => {
+      const r = await fetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json`, { signal: AbortSignal.timeout(3000) });
+      return r.json() as Promise<{ title: string; score: number; url?: string }>;
+    }));
+    parts.push(`<b>🔶 Hacker News Top 5</b>`);
+    for (const s of stories) {
+      parts.push(`  ${s.score}⬆ ${s.title}`);
+    }
+    parts.push("");
+  } catch {
+    parts.push("HN: unavailable");
+    parts.push("");
+  }
+
+  // 9. X/Twitter Trends (Thailand)
+  try {
+    const xRes = await fetch("https://getdaytrends.com/thailand/", { signal: AbortSignal.timeout(5000) });
+    const xHtml = await xRes.text();
+    const trends = [...xHtml.matchAll(/<td class="main"><a[^>]*>([^<]+)<\/a>/g)].slice(0, 8).map(m => m[1]);
+    if (trends.length > 0) {
+      parts.push(`<b>🐦 X Trends (Thailand)</b>`);
+      parts.push(`  ${trends.join(" · ")}`);
+      parts.push("");
+    }
+  } catch {}
+
+  // 10. BBC Top Headlines
+  try {
+    const bbcRes = await fetch("https://feeds.bbci.co.uk/news/rss.xml", { signal: AbortSignal.timeout(5000) });
+    const bbcXml = await bbcRes.text();
+    const headlines = [...bbcXml.matchAll(/<title><!\[CDATA\[([^\]]+)\]\]><\/title>/g)].slice(1, 6).map(m => m[1]);
+    if (headlines.length > 0) {
+      parts.push(`<b>📰 BBC Headlines</b>`);
+      for (const h of headlines) {
+        parts.push(`  • ${h}`);
+      }
+      parts.push("");
+    }
+  } catch {}
+
   parts.push("— Oracle Nerve 🧠");
 
   return parts.join("\n");
