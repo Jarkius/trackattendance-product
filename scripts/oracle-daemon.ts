@@ -163,6 +163,9 @@ async function handleEscalation(daemon: DaemonConfig): Promise<void> {
     `Auto-diagnosis in 15 min if no recovery.`
   );
 
+  // Voice alert (macOS) — from opensourcenatbrain pattern
+  try { Bun.spawn(["say", "-v", "Kanya", `${daemon.name} ล่มซ้ำ ระดับ 3`], { stdout: "pipe", stderr: "pipe" }); } catch {}
+
   // Set timer for L4 (auto-diagnosis)
   if (daemon.escalationTimer) clearTimeout(daemon.escalationTimer);
   daemon.escalationTimer = setTimeout(() => escalateToL4(daemon), L4_DELAY_MS);
